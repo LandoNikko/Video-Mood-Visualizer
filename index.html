@@ -2,1235 +2,601 @@
 <html>
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Video Mood Visualizer</title>
-  <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <!-- h1 Font: Licorice -->
-  <link href="https://fonts.googleapis.com/css2?family=Licorice&display=swap" rel="stylesheet">
-  <!-- h2 Font: Viaoda Libre -->
-  <link href="https://fonts.googleapis.com/css2?family=Viaoda+Libre&display=swap" rel="stylesheet">
-  <!-- General Font: Karla Tamil Inclined -->
-  <link href="https://fonts.googleapis.com/css2?family=Karla+Tamil+Inclined&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Licorice&family=Viaoda+Libre&family=Karla+Tamil+Inclined:wght@200&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet"/>
   <style>
-    /* Global Styles */
-    body {
-      margin: 0;
-      padding: 20px;
-      background-color: #0a0a0a;
-      color: #f1f1f1;
-      font-family: 'Karla Tamil Inclined', sans-serif;
-      font-weight: 200;
+    :root {
+      --primary-bg: #0a0a0a; --primary-bg-card: #151515; --border-color-medium: #3a3c40;
+      --text-primary: #f1f1f1; --text-secondary: #ccc; --text-selected: #000;
+      --accent-color: #6447ff;
+      /* Gradient Colors */
+      --gradient-first: #6200ff; --gradient-second: #ff5200; --gradient-third: #d117e1;
+      --font-body: 'Karla Tamil Inclined', sans-serif;
+      --border-standard: 1px solid var(--border-color-medium);
+      --border-radius-pill: 9999px; --border-radius-large: 30px; --border-radius-medium: 20px;
+      --border-radius-small: 6px; --border-radius-xsmall: 4px; --border-radius-circle: 50%;
+      --transition-fast: 0.2s ease; --transition-medium: 0.3s ease; --transition-slow: 0.5s ease; --transition-gradient: background-position 1s ease;
     }
-    /* Ensure h1 and h2 are not bold */
-    h1, h2 { font-weight: normal; }
-    
-    /* Background canvas styling */
-    #bgCanvas {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      z-index: -100;
-    }
-    /* Header with h1 */
-    .header-container {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-    .title-wrapper {
-      display: inline-block;
-      transform: rotate(-3deg);
-    }
-    .title-wrapper h1 {
-      font-family: 'Licorice', cursive;
-      font-size: 4.5rem;
-      margin: 0;
-      color: #ffffff;
-      cursor: pointer;
-      user-select: none;
-      animation: fadeIn 0.5s ease forwards;
-      font-weight: normal;
-    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; padding: 20px; background-color: var(--primary-bg); color: var(--text-primary); font-family: var(--font-body); font-weight: 200; }
+    body.modal-open { overflow: hidden; }
+
+    h1, h2, h3 { font-weight: normal; color: var(--text-secondary); margin: 0; }
+    h1 { font-family: 'Licorice', cursive; font-size: 4.5rem; cursor: pointer; }
+    h2 { font-family: 'Viaoda Libre', cursive; font-size: 2rem; margin-bottom: 0.7em; }
+    h3 { font-size: 1rem; }
+    h3[title], span[title], button[title]
+
+    .title-wrapper h1, .column-title, h3, #timeElapsed { user-select: none; }
+    input, button, select { font-family: var(--font-body); }
+    #bgCanvas { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: -100; }
+    .header-container { text-align: center; margin-bottom: 20px; }
+    .title-wrapper { display: inline-block; transform: rotate(-3deg); }
+    .title-wrapper h1 { animation: fadeIn var(--transition-slow); }
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-    
-    /* Cards container wrapping the main-container and Help button */
-    .cards-container {
-      position: relative;
-      width: 940px;
-      margin: 20px auto;
+    .cards-container { position: relative; max-width: 940px; width: 95%; margin: 20px auto; }
+    .main-container { display: grid; grid-template-columns: repeat(3, 1fr); align-items: stretch; gap: 20px; }
+    #infoButton { position: absolute; top: -40px; right: 0; background-color: transparent; border: var(--border-standard); border-radius: var(--border-radius-pill); color: var(--text-secondary); padding: 8px 12px; cursor: pointer; z-index: 1000; transition: background-color var(--transition-medium); }
+    #infoButton:hover { background-color: var(--text-selected); }
+    .column-upload, .column-manual, .column-generate { display: flex; flex-direction: column; }
+    .column-card { background-color: var(--primary-bg-card); border: var(--border-standard); border-radius: var(--border-radius-large); padding: 20px; height: 100%; display: flex; flex-direction: column; }
+    .column-title { border-bottom: var(--border-standard); animation: fadeIn var(--transition-slow); }
+    .column-generate .column-title {
+        position: relative;
+        padding-right: 30px;
     }
-    /* Main container holding the three columns */
-    .main-container {
-      display: flex;
-      justify-content: center;
-      align-items: stretch;
-      gap: 20px;
+    .generation-spinner {
+        position: absolute;
+        top: 50%;
+        right: 0px;
+        transform: translateY(-50%);
+        display: none;
+        line-height: 0;
     }
-    /* Master Help Button: starts transparent with a stroke; on hover becomes black */
-    #infoButton {
-      position: absolute;
-      top: -40px;
-      right: 0;
-      background-color: rgba(0, 0, 0, 0);
-      border: 1px solid #3a3c40;
-      border-radius: 9999px;
-      color: #ccc;
-      padding: 8px 12px;
-      cursor: pointer;
-      z-index: 1000;
-      transition: background-color 0.3s;
+    .generation-spinner svg {
+        width: 20px;
+        height: 20px;
+        color: var(--accent-color);
+        display: block;
     }
-    #infoButton:hover {
-      background-color: #000;
+    .generation-spinner.spinner-active {
+        display: block;
     }
-    
-    /* Column Titles – Upload, Adjust, Generate */
-    .column-title {
-      font-family: 'Viaoda Libre', cursive;
-      font-size: 2rem;
-      margin: 0;
-      padding-bottom: 10px;
-      border-bottom: 1px solid #3a3c40;
-      margin-bottom: 20px;
-      color: #ccc;
-      animation: fadeIn 0.5s ease forwards;
-      font-weight: normal;
-      user-select: none;
-    }
-    
-    h3 {
-      font-family: 'Karla Tamil Inclined', sans-serif;
-      font-size: 1rem;
-      color: #ccc;
-      font-weight: normal;
-      margin: 0;
-      user-select: none;
-    }
-    .upload-header, .generation-mode-header { margin-bottom: 5px; }
-    
-    /* Center h3 texts with info icons */
-    .crop-generate h3,
-    .output-size-container h3,
-    .rotation-toggle-container h3,
-    .film-grain-generate h3,
-    .generation-mode-header {
-      display: inline-flex;
-      align-items: center;
-    }
-    
-    /* Gradient text styling for .mood */
-    .mood {
-      background: linear-gradient(90deg, #ff007a, #ffcf00, #00d4ff);
-      background-size: 200%;
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      transition: background-position 1s ease;
-    }
-    #moodButton span.mood {
-      background: linear-gradient(90deg, #ff007a, #ffcf00, #00d4ff);
-      background-size: 200%;
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      transition: background-position 1s ease;
-    }
-    #moodButton:hover span.mood { background-position: 100%; }
-    .title-wrapper h1:hover .mood { background-position: 100%; }
-    
-    @keyframes previewGlow {
-      0% { box-shadow: 0 0 0px rgba(255,255,255,0); }
-      50% { box-shadow: 0 0 20px rgba(255,255,255,0.3); }
-      100% { box-shadow: 0 0 0px rgba(255,255,255,0); }
-    }
-    
-    input, button, select { font-family: 'Karla Tamil Inclined', sans-serif; }
-    .divider90 {
-      width: 90%;
-      border: none;
-      border-top: 1px solid rgba(58,60,64,0.5);
-      margin: 1em auto;
-    }
-    .output-size-container { margin-bottom: 10px; padding-bottom: 0; }
-    .output-size-container h3 { margin-bottom: 0; }
-    
-    .segmented-control {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 5px;
-      padding: 1em 0;
-      margin-bottom: 0;
-    }
-    .segmented-control.mode-control {
-      margin: 1em 0;
-      padding: 0;
-    }
+    .mood, #moodButton span.mood { background: linear-gradient(90deg, var(--gradient-first), var(--gradient-second), var(--gradient-third)); background-size: 200%; background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent; transition: var(--transition-gradient); }
+    .title-wrapper h1:hover .mood, #moodButton:hover span.mood { background-position: 100%; }
+    .divider90 { width: 90%; border: none; border-top: 1px solid rgba(58, 60, 64, 0.5); margin: 1em auto; }
+    .segmented-control { display: grid; grid-template-columns: repeat(2, 1fr); gap: 5px; margin: 1em 0; }
+    .segmented-control.mode-control { margin: 1em 0; padding: 0; }
     .segmented-control input[type="radio"] { display: none; }
-    .segmented-control label {
-      padding: 8px 12px;
-      background-color: #151515;
-      border: 1px solid #3a3c40;
-      border-radius: 4px;
-      cursor: pointer;
-      transition: filter 0.3s;
-      font-size: 0.9rem;
-      color: #ccc;
-      text-align: center;
-    }
+    .segmented-control label { padding: 8px 12px; background-color: var(--primary-bg-card); border: var(--border-standard); border-radius: var(--border-radius-xsmall); cursor: pointer; transition: filter var(--transition-medium), background-color var(--transition-medium), color var(--transition-medium); font-size: 0.9rem; color: var(--text-secondary); text-align: center; position: relative; }
     .segmented-control label:hover { filter: brightness(95%); }
-    .segmented-control input[type="radio"]:checked + label {
-      background-color: #6447ff;
-      color: #000;
+    .segmented-control input[type="radio"]:checked + label { background-color: var(--accent-color); color: var(--text-selected); border-color: var(--accent-color); }
+    .checkmark-indicator {
+        display: none;
+        position: absolute;
+        top: 2px;
+        right: 4px;
+        font-size: 0.8em;
+        line-height: 1;
+        color: var(--text-primary);
     }
-    .rotation-toggle-container, .film-grain-generate {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-end;
-      font-size: 0.9rem;
-      color: #ccc;
+    .checkmark-indicator i { display: block; }
+    .checkmark-indicator i.ri-progress-2-line {
+        opacity: 0.5;
     }
-    .toggle-switch {
-      position: relative;
-      display: inline-block;
-      width: 50px;
-      height: 24px;
-      cursor: pointer;
+    .segmented-control input[type="radio"]:checked + label .checkmark-indicator {
+         color: var(--text-selected);
     }
-    .toggle-switch input { opacity: 0; width: 0; height: 0; }
-    .slider {
-      position: absolute;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background-color: #555;
-      transition: .4s;
-      border-radius: 24px;
+    .checkmark-indicator.visible {
+        display: inline-block;
     }
-    .slider:before {
-      position: absolute;
-      content: "";
-      height: 20px;
-      width: 20px;
-      left: 2px;
-      bottom: 2px;
-      background-color: #fff;
-      transition: .4s;
-      border-radius: 50%;
-    }
-    .toggle-switch input:checked + .slider {
-      background-color: #6447ff;
-    }
-    .toggle-switch input:checked + .slider:before {
-      transform: translateX(26px);
-    }
-    .column-box {
-      background-color: #151515;
-      border: 1px solid #3a3c40;
-      border-radius: 30px;
-      padding: 20px;
-      box-sizing: border-box;
-      display: flex;
-      flex-direction: column;
-      height: 100%;
-    }
-    .column-upload, .column-manual, .column-generate {
-      width: 300px;
-      display: flex;
-      flex-direction: column;
-    }
-    .column-upload .column-box { text-align: left; }
-    #dropZoneText {
-      font-size: 1rem;
-      margin-bottom: 1em;
-      word-break: break-all;
-      overflow-wrap: break-word;
-      text-align: center;
-    }
-    .upload-header { margin-bottom: 0; }
-    #dropZone {
-      width: 100%;
-      height: auto;
-      padding: 20px;
-      margin: 1em 0;
-      border: 1px solid #3a3c40;
-      border-radius: 20px;
-      background-color: #0a0a0a;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      cursor: pointer;
-      transition: background-color 0.2s, border-color 0.2s;
-      box-sizing: border-box;
-    }
-    #dropZone:hover { background-color: #0b0b0b; border-color: #5a5a5a; }
-    #uploadIcon svg { width: 48px; height: 48px; fill: #f1f1f1; }
-    #selectFileButton {
-      padding: 8px 16px;
-      font-size: 1rem;
-      background-color: #505050;
-      border: none;
-      border-radius: 9999px;
-      color: #fff;
-      cursor: pointer;
-      transition: background-color 0.2s, border 0.2s;
-    }
-    #dropZone:hover #selectFileButton { background-color: #474747; }
-    #selectFileButton.file-selected {
-      background-color: transparent;
-      border: 1px solid rgba(255,255,255,0.8);
-    }
-    #selectFileButton.file-selected:hover { border-color: rgba(255,255,255,1); }
-    #loadingBarContainer {
-      width: 100%;
-      height: 10px;
-      background-color: #3a3c40;
-      border-radius: 5px;
-      margin: 10px 0 0;
-      display: none;
-    }
-    #loadingBar {
-      height: 100%;
-      width: 0%;
-      background-color: #6447ff;
-      border-radius: 5px;
-      transition: width 0.3s;
-    }
-    .toggle-container, .range-container { margin: 0; }
-    .toggle-container label { font-size: 1rem; color: #ccc; }
-    .toggle-container { display: flex; justify-content: space-between; align-items: center; }
-    .number-inputs { padding: 0; }
-    .range-wrapper {
-      display: flex;
-      align-items: center;
-      gap: 0;
-    }
-    .range-wrapper input[type="number"] {
-      width: 100%;
-      padding: 5px;
-      border: 1px solid #3a3c40;
-      border-radius: 4px;
-      background-color: #1a1a1a;
-      color: #f1f1f1;
-      box-sizing: border-box;
-      text-align: center;
-    }
-    .range-wrapper input[type="number"]:focus { outline: none; box-shadow: none; }
-    .column-manual video {
-      width: 100%;
-      border: 2px solid #3a3c40;
-      border-radius: 6px;
-      background-color: #151515;
-      margin-top: 1em;
-      margin-bottom: 1em;
-    }
-    .manual-buttons { display: flex; gap: 0; }
-    .manual-buttons button {
-      flex: 1;
-      padding: 8px 12px;
-      font-size: 0.9rem;
-      background-color: #151515;
-      border: 1px solid #3a3c40;
-      border-radius: 4px;
-      color: #ccc;
-      cursor: pointer;
-      transition: filter 0.3s;
-    }
+    #dropZone { width: 100%; padding: 20px; margin: 1em 0; border: var(--border-standard); border-radius: var(--border-radius-medium); background-color: var(--primary-bg); display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; transition: background-color var(--transition-fast), border-color var(--transition-fast); text-align: center; }
+    #dropZone:hover { background-color: #0b0b0b; border-color: var(--accent-color); }
+    #dropZoneText { font-size: 1rem; margin: 1em; word-break: break-all; overflow-wrap: break-word; }
+    #uploadIcon svg { width: 48px; height: 48px; fill: var(--text-primary); }
+    #selectFileButton { padding: 8px 16px; font-size: 1rem; background-color: #505050; border: none; border-radius: var(--border-radius-pill); color: var(--text-primary); cursor: pointer; transition: background-color var(--transition-fast), border var(--transition-fast); }
+    #dropZone:hover #selectFileButton { background-color: var(--accent-color); }
+    #selectFileButton.file-selected { background-color: transparent; border: 1px solid var(--border-color-medium); }
+    #loadingBarContainer { width: 100%; height: 10px; background-color: var(--border-color-medium); border-radius: 5px; margin: 10px 0 0; display: none; overflow: hidden; }
+    #loadingBar { height: 100%; width: 0%; background-color: var(--accent-color); border-radius: 5px; transition: width var(--transition-medium); }
+    .column-manual video { width: 100%; border: 2px solid var(--border-color-medium); border-radius: var(--border-radius-small); background-color: var(--primary-bg-card); margin: 1em 0; }
+    .range-wrapper { display: flex; align-items: center; gap: 5px; }
+    .range-wrapper input[type="number"] { width: 100%; padding: 0.5em 0; border: var(--border-standard); border-radius: var(--border-radius-xsmall); background-color: var(--primary-bg); color: var(--text-primary); text-align: center; }
+    .range-wrapper input[type="number"]:focus { outline: none; border-color: var(--accent-color); }
+    .manual-buttons { display: flex; gap: 5px; }
+    .manual-buttons button { flex: 1; padding: 0.5em 0; font-size: 0.9rem; background-color: var(--primary-bg-card); border: var(--border-standard); border-radius: var(--border-radius-xsmall); color: var(--text-secondary); cursor: pointer; transition: filter var(--transition-medium); }
     .manual-buttons button:hover { filter: brightness(95%); }
-    .crop-generate {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      width: 100%;
-      margin: 0;
-      padding: 0;
-    }
-    .crop-generate h3 { margin: 0; }
-    .generation-mode-header { margin-bottom: 0; }
-    .segmented-control.mode-control {
-      grid-template-columns: repeat(2, 1fr);
-      gap: 5px;
-      margin: 1em 0;
-      padding: 0;
-    }
-    .column-generate button {
-      width: 100%;
-      padding: 12px 24px;
-      font-size: 1rem;
-      border: none;
-      border-radius: 9999px;
-      margin-top: 0;
-    }
-    /* Mood/Cancel Button styles */
-    #moodButton {
-      position: relative;
-      background-color: #000;
-      color: white;
-      padding: 12px 24px;
-      font-size: 1rem;
-      border: none;
-      border-radius: 9999px;
-      cursor: pointer;
-      z-index: 1;
-      overflow: hidden;
-      transition: background-color 0.3s;
-    }
-    #moodButton::before {
-      content: "";
-      position: absolute;
-      top: -4px;
-      left: -4px;
-      right: -4px;
-      bottom: -4px;
-      background: linear-gradient(90deg, #ff007a, #ffcf00, #00d4ff);
-      background-size: 200%;
-      z-index: -1;
-      border-radius: inherit;
-      transition: background-position 1s ease;
-    }
+    .column-generate button#moodButton { width: 100%; padding: 12px 24px; font-size: 1rem; border: none; border-radius: var(--border-radius-pill); margin-top: 1em; }
+    #moodButton { position: relative; background-color: var(--primary-bg); color: var(--text-primary); cursor: pointer; z-index: 1; overflow: hidden; transition: background-color var(--transition-medium); }
+    #moodButton::before { content: ""; position: absolute; inset: -4px; background: linear-gradient(90deg, var(--gradient-first), var(--gradient-second), var(--gradient-third)); background-size: 200%; z-index: -1; border-radius: inherit; transition: var(--transition-gradient); }
     #moodButton:hover::before { background-position: 100%; }
     .cancel-mode::before { display: none; }
-    #resultCanvas {
-      display: block;
-      margin: 20px auto;
-      border: 1px solid #3a3c40;
-      transition: box-shadow 2s;
-      cursor: pointer;
-      max-width: 938px;
-      max-height: 550px;
-      width: auto;
-      height: auto;
-      border-radius: 6px;
+    .cancel-mode { background-color: var(--primary-bg) !important; color: var(--text-primary) !important; }
+    #resultCanvas { display: block; margin: 20px auto; border: var(--border-standard); transition: box-shadow 2s; cursor: pointer; max-width: 938px; max-height: 550px; width: auto; height: auto; border-radius: var(--border-radius-small); }
+    @keyframes previewGlow { 50% { box-shadow: 0 0 20px rgba(255,255,255,0.3); } }
+    #timeElapsed { text-align: center; color: rgba(255,255,255,0.3); margin-top: 10px; font-size: 1rem; display: none; }
+    .header-with-toggle { display: flex; justify-content: space-between; }
+    .icon-toggle-button { background: none; border: none; cursor: pointer; color: var(--text-secondary); border-radius: var(--border-radius-xsmall); line-height: 0; transition: background-color var(--transition-fast), color var(--transition-fast); }
+    .icon-toggle-button:hover { background-color: var(--primary-bg); }
+    .icon-toggle-button svg { display: block; width: 20px; height: 20px; }
+    .icon-toggle-button.active { color: var(--accent-color); }
+    .icon-toggle-button:disabled { opacity: 0.4; cursor: not-allowed; background-color: transparent !important; color: var(--text-secondary) !important; }
+    #customSizeInputs { display: none; margin-top: 10px; }
+    #customSizeInputs .range-wrapper { gap: 10px; }
+    #customSizeInputs .range-wrapper input[type="number"] { min-width: 60px; }
+
+    /* Help Modal Styles */
+    #helpModalOverlay {
+        position: fixed;
+        inset: 0;
+        background-color: rgba(0, 0, 0, 0.7);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 2000;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity var(--transition-medium), visibility var(--transition-medium);
     }
-    #timeElapsed {
-      text-align: center;
-      color: rgba(255,255,255,0.3);
-      margin-top: 10px;
-      font-size: 1rem;
-      display: none;
-      user-select: none;
+    body.modal-open #helpModalOverlay {
+        opacity: 1;
+        visibility: visible;
     }
-    
-    /* Updated Info Icon styling with smaller circle and 1em left margin */
-    .info-icon {
-      display: inline-block;
-      width: 16px;
-      height: 16px;
-      line-height: 16px;
-      text-align: center;
-      border-radius: 50%;
-      background-color: #151515;
-      border: 1px solid #3a3c40;
-      color: #3a3c40;
-      font-size: 10px;
-      font-weight: normal;
-      margin-left: 1em;
-      cursor: pointer;
-      position: relative;
-      vertical-align: middle;
-      transition: background-color 0.3s;
+    #helpModalContent {
+        background-color: var(--primary-bg-card);
+        padding: 30px;
+        border-radius: var(--border-radius-large);
+        max-width: 600px;
+        width: 90%;
+        max-height: 80vh;
+        overflow-y: auto;
+        border: var(--border-standard);
+        position: relative;
+        transform: scale(0.95);
+        transition: transform var(--transition-medium);
+        color: var(--text-secondary);
+        scrollbar-width: none;
     }
-    .info-icon:hover {
-      background-color: #000;
+    body.modal-open #helpModalContent {
+         transform: scale(1);
     }
-    .info-icon::after {
-      content: attr(data-tooltip);
-      position: absolute;
-      bottom: 125%;
-      left: 50%;
-      transform: translateX(-50%);
-      background-color: rgba(0, 0, 0, 0.75);
-      color: #fff;
-      padding: 5px 8px;
-      border-radius: 4px;
-      white-space: nowrap;
-      opacity: 0;
-      visibility: hidden;
-      transition: opacity 0.3s;
-      z-index: 1000;
+    #helpModalContent h2 {
+        font-family: 'Viaoda Libre', cursive;
+        font-size: 1.8rem;
+        color: var(--text-primary);
+        margin-top: 0;
+        margin-bottom: 20px;
+        text-align: center;
     }
-    .info-icon:hover::after {
-      opacity: 1;
-      visibility: visible;
+    #helpModalContent h3 {
+        font-size: 1.1rem;
+        color: var(--text-primary);
+        margin-top: 20px;
+        margin-bottom: 10px;
+        border-bottom: 1px solid var(--border-color-medium);
+        padding-bottom: 5px;
+    }
+     #helpModalContent p, #helpModalContent li {
+        font-size: 0.95rem;
+        line-height: 1.6;
+    }
+    #helpModalContent ul {
+        padding-left: 20px;
+        margin-top: 5px;
+        margin-bottom: 15px;
+    }
+    #helpModalContent li {
+        margin-bottom: 8px;
+    }
+    #helpModalContent strong {
+        font-weight: bold;
+        color: var(--text-primary);
+    }
+    #closeHelpModal {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: none;
+        border: none;
+        color: var(--text-secondary);
+        font-size: 1.5rem;
+        cursor: pointer;
+        padding: 5px;
+        line-height: 1;
+    }
+    #closeHelpModal:hover {
+        color: var(--text-primary);
+    }
+    .modal-footer {
+        text-align: center;
+        margin-top: 30px;
+        border-top: 1px solid var(--border-color-medium);
+        padding-top: 15px;
+    }
+    .modal-footer a {
+        color: var(--text-secondary);
+        text-decoration: none;
+        font-size: 1.5rem;
+        transition: color var(--transition-fast);
+    }
+    .modal-footer a:hover {
+        color: var(--text-primary);
+    }
+
+    /* Media Queries */
+    @media (max-width: 900px) {
+      .main-container { grid-template-columns: repeat(2, 1fr); }
+      .column-generate {grid-column: 1 / -1; min-width: 50%; }      
+      #resultCanvas { width: 100%; height: auto; }
+    }
+    @media (max-width: 748px) { .main-container { grid-template-columns: 1fr; }
+      .cards-container { width: 100%; }
+      h1 { font-size: clamp(2.5rem, 10vw, 4rem); }
+      #resultCanvas { width: 100%; height: auto; }
     }
   </style>
 </head>
 <body>
-  <!-- Background Canvas for Film Grain on website (more subtle) -->
   <canvas id="bgCanvas"></canvas>
-  
-  <!-- Header with h1 -->
   <div class="header-container">
-    <div class="title-wrapper">
-      <h1 onclick="window.location.reload()">Video <span class="mood">Mood</span> Visualizer</h1>
-    </div>
+    <div class="title-wrapper"><h1 onclick="window.location.reload()">Video <span class="mood">Mood</span> Visualizer</h1></div>
   </div>
-  
-  <!-- Cards Container wrapping main-container and Help button -->
   <div class="cards-container">
-    <!-- Master Help Button (renamed from Info) positioned above the cards -->
     <button id="infoButton">Help</button>
-    
-    <!-- Main Container with cards -->
     <div class="main-container">
-      <!-- Upload Column -->
+      <!-- Upload Card -->
       <div class="column-upload">
-        <div class="column-box">
+        <div class="column-card">
           <h2 class="column-title">Upload</h2>
-          <h3 class="upload-header">File</h3>
+          <h3>File</h3>
           <div id="dropZone">
-            <div id="uploadIcon">
-              <svg viewBox="0 0 24 24">
-                <path d="M12 2l5.5 9h-4v9h-3v-9h-4l5.5-9z"/>
-              </svg>
-            </div>
-            <div id="dropZoneText">Drag and drop a video file to upload</div>
+            <div id="uploadIcon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path stroke-dasharray="14" stroke-dashoffset="14" d="M6 19h12"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.5s" dur="0.4s" values="14;0"/></path><path stroke-dasharray="18" stroke-dashoffset="18" d="M12 15 h2 v-6 h2.5 L12 4.5M12 15 h-2 v-6 h-2.5 L12 4.5"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.4s" values="18;0"/><animate attributeName="d" calcMode="linear" dur="1.5s" keyTimes="0;0.7;1" repeatCount="indefinite" values="M12 15 h2 v-6 h2.5 L12 4.5M12 15 h-2 v-6 h-2.5 L12 4.5;M12 15 h2 v-3 h2.5 L12 7.5M12 15 h-2 v-3 h-2.5 L12 7.5;M12 15 h2 v-6 h2.5 L12 4.5M12 15 h-2 v-6 h-2.5 L12 4.5"/></path></g></svg></div>
+            <div id="dropZoneText">Drag and drop or select a video file to upload</div>
             <button id="selectFileButton" type="button">Select file</button>
             <input type="file" id="videoInput" accept="video/*" style="display: none;">
           </div>
-          <div id="loadingBarContainer">
-            <div id="loadingBar"></div>
-          </div>
+          <div id="loadingBarContainer"><div id="loadingBar"></div></div>
         </div>
       </div>
-      
-      <!-- Adjust Column -->
       <div class="column-manual">
-        <div class="column-box">
+        <div class="column-card">
           <h2 class="column-title" title="Optional. Gives finer control to your output">Adjust</h2>
-          <div class="crop-generate">
-            <h3>Crop Video <span class="info-icon" data-tooltip="Useful for cropping end credits">?</span></h3>
-          </div>
-          <video id="manualVideo" controls style="border-radius: 6px;"></video>
-          <div class="range-container extra">
-            <div class="number-inputs">
-              <div class="range-wrapper">
+          <h3 title="Trim the video using the buttons below based on the preview player">Crop Video</h3>
+          <video id="manualVideo" controls></video>
+          <div class="range-container"><div class="number-inputs"><div class="range-wrapper">
                 <input type="number" id="startTimeInput" placeholder="Start" value="0">
                 <input type="number" id="endTimeInput" placeholder="End">
-              </div>
-            </div>
-          </div>
-          <div class="manual-buttons extra">
-            <button id="setStartButton">Set Start</button>
-            <button id="setEndButton">Set End</button>
+          </div></div></div>
+          <div class="manual-buttons">
+            <button id="setStartButton" type="button">Set Start</button>
+            <button id="setEndButton" type="button">Set End</button>
           </div>
         </div>
       </div>
-      
-      <!-- Generate Column -->
+      <!-- Generate Card -->
       <div class="column-generate">
-        <div class="column-box">
-          <h2 class="column-title" title="Samples and processes frame colors locally in your browser">Generate</h2>
+        <div class="column-card">
+          <h2 class="column-title" title="Samples and processes frame colors locally in your browser">
+            Generate
+            <span id="generationSpinner" class="generation-spinner">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M12,4a8,8,0,0,1,7.89,6.7A1.53,1.53,0,0,0,21.38,12h0a1.5,1.5,0,0,0,1.48-1.75,11,11,0,0,0-21.72,0A1.5,1.5,0,0,0,2.62,12h0a1.53,1.53,0,0,0,1.49-1.3A8,8,0,0,1,12,4Z"><animateTransform attributeName="transform" dur="0.75s" repeatCount="indefinite" type="rotate" values="0 12 12;360 12 12"/></path></svg>
+            </span>
+          </h2>
           <div class="output-size-container">
-            <h3>Format <span class="info-icon" data-tooltip="Desktop (3200×1800) - Phone (1500×3000) - Poster (3000×4500) - Square (2000×2000)">?</span></h3>
+            <h3 class="header-with-toggle">
+              <span title="Desktop (3200×1800), Phone (1500×3000), Square (2000×2000), or set Custom dimensions">Format</span>
+              <button id="rotateButton" class="icon-toggle-button" title="Rotate format 90°" type="button">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M12 5H6a2 2 0 0 0-2 2v3"/><path d="m9 8l3-3l-3-3M4 14v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/></g></svg>
+              </button>
+            </h3>
             <div class="segmented-control" id="sizeControl">
-              <input type="radio" name="sizePreset" id="size-desktop" value="Desktop" checked>
-              <label for="size-desktop">Desktop</label>
-              <input type="radio" name="sizePreset" id="size-phone" value="Phone">
-              <label for="size-phone">Phone</label>
-              <input type="radio" name="sizePreset" id="size-poster" value="Poster">
-              <label for="size-poster">Poster</label>
-              <input type="radio" name="sizePreset" id="size-square" value="Square">
-              <label for="size-square">Square</label>
+              <input type="radio" name="sizePreset" id="size-desktop" value="Desktop" checked><label for="size-desktop">Desktop<span class="checkmark-indicator"><i></i></span></label>
+              <input type="radio" name="sizePreset" id="size-phone" value="Phone"><label for="size-phone">Phone<span class="checkmark-indicator"><i></i></span></label>
+              <input type="radio" name="sizePreset" id="size-square" value="Square"><label for="size-square">Square<span class="checkmark-indicator"><i></i></span></label>
+              <input type="radio" name="sizePreset" id="size-custom" value="Custom"><label for="size-custom">Custom<span class="checkmark-indicator"><i></i></span></label>
             </div>
-            <div class="rotation-toggle-container" id="rotationContainer">
-              <h3>Rotate <span class="info-icon" data-tooltip="Rotates your selected format canvas by 90°">?</span></h3>
-              <label class="toggle-switch">
-                <input type="checkbox" id="rotationToggle">
-                <span class="slider"></span>
-              </label>
+            <div id="customSizeInputs">
+                 <div class="range-wrapper">
+                     <input type="number" id="customWidthInput" placeholder="Width" min="100" step="100">
+                     <input type="number" id="customHeightInput" placeholder="Height" min="100" step="100">
+                 </div>
             </div>
           </div>
           <hr class="divider90">
-          <div class="film-grain-generate">
-            <h3>Film Grain <span class="info-icon" data-tooltip="After your image is generated, you can toggle film grain effect to it">?</span></h3>
-            <label class="toggle-switch">
-              <input type="checkbox" id="filmGrainToggle">
-              <span class="slider"></span>
-            </label>
-          </div>
-          <hr class="divider90">
-          <h3 class="generation-mode-header">Mode <span class="info-icon" data-tooltip="Color (average color) - Stretch (stretched frames) - Gradient (blurred stretched frames) - Pixel (average color in rows of cells)">?</span></h3>
+          <h3 class="header-with-toggle">
+            <span title="Visualization style. Click Help-button on top right for more info">Mode</span>
+            <button id="filmGrainButton" class="icon-toggle-button" title="Toggle Film Grain" type="button">
+               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"><path fill="currentColor" d="M18 8c1.1 0 2-.9 2-2s-.9-2-2-2s-2 .9-2 2s.9 2 2 2m0 8c1.1 0 2-.9 2-2s-.9-2-2-2s-2 .9-2 2s.9 2 2 2M6 8c-1.1 0-2 .9-2 2s.9 2 2 2s2-.9 2-2s-.9-2-2-2m8 0c-1.1 0-2 .9-2 2s.9 2 2 2s2-.9 2-2s-.9-2-2-2m-4 8c1.1 0 2-.9 2-2s-.9-2-2-2s-2 .9-2 2s.9 2 2 2m0-12c-1.1 0-2 .9-2 2s.9 2 2 2s2-.9 2-2s-.9-2-2-2m4 12c-1.1 0-2 .9-2 2s.9 2 2 2s2-.9 2-2s-.9-2-2-2m-8 4c1.1 0 2-.9 2-2s-.9-2-2-2s-2 .9-2 2s.9 2 2 2"/></svg>
+            </button>
+          </h3>
           <div class="segmented-control mode-control" id="modeControl">
-            <input type="radio" name="modePreset" id="mode-color" value="color" checked>
-            <label for="mode-color">Color</label>
-            <input type="radio" name="modePreset" id="mode-stretch" value="stretch">
-            <label for="mode-stretch">Stretch</label>
-            <input type="radio" name="modePreset" id="mode-gradient" value="gradient">
-            <label for="mode-gradient">Gradient</label>
-            <input type="radio" name="modePreset" id="mode-pixel" value="pixel">
-            <label for="mode-pixel">Pixel</label>
+            <input type="radio" name="modePreset" id="mode-color" value="color" checked><label for="mode-color">Color<span class="checkmark-indicator"><i></i></span></label>
+            <input type="radio" name="modePreset" id="mode-stretch" value="stretch"><label for="mode-stretch">Stretch<span class="checkmark-indicator"><i></i></span></label>
+            <input type="radio" name="modePreset" id="mode-gradient" value="gradient"><label for="mode-gradient">Gradient<span class="checkmark-indicator"><i></i></span></label>
+            <input type="radio" name="modePreset" id="mode-pixel" value="pixel"><label for="mode-pixel">Pixel<span class="checkmark-indicator"><i></i></span></label>
           </div>
-          <button id="moodButton">Create Mood</button>
+          <button id="moodButton" type="button">Create Mood</button>
         </div>
       </div>
     </div>
   </div>
-  
-  <!-- Preview Canvas -->
   <canvas id="resultCanvas"></canvas>
-  <!-- Time Elapsed / Remaining -->
-  <div id="timeElapsed" style="user-select: none;" title="Each sample involves seeking, decoding, and averaging video frame pixels—operations that are CPU/GPU intensive. In 'Pixel' mode, total samples equal the number of grid cells (cell size fixed at 100 pixels)."></div>
-  
-  <!-- Hidden Elements for Processing -->
+  <div id="timeElapsed" title="Each sample involves seeking, decoding, and averaging video frame pixels—operations that are CPU/GPU intensive. In 'Pixel' mode, total samples equal the number of grid cells (cell size fixed at 100 pixels)."></div>
   <video id="video" style="display: none;"></video>
   <canvas id="frameCanvas" style="display: none;"></canvas>
-  
+
+  <!-- Help Modal -->
+  <div id="helpModalOverlay">
+      <div id="helpModalContent">
+        <button id="closeHelpModal" title="Close" style="margin: 0 auto;"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-dasharray="12" stroke-dashoffset="12" stroke-linecap="round" stroke-width="2" d="M12 12L19 19M12 12L5 5M12 12L5 19M12 12L19 5"><animate fill="freeze" attributeName="stroke-dashoffset" dur="1s" values="12;0"/></path></svg></button>
+          <div style="background-color: var(--primary-bg-card); border-bottom: 1px solid var(--border-color-medium); text-align: center;">
+              <h2 style="font-size: 2rem; margin-bottom: 0em; text-align: left;">About</h2>
+          </div>
+          <p>Video Mood Visualizer transforms your video file into a single image that reflects its overall tone or "mood" by sampling and processing frames into a sequence. All done locally! It features different output formats and styles for aesthetic representations of video content for creative projects, video analysis or just for fun!</p>
+          <h2 style="font-size: 2rem; color: var(--gradient-second);">How to Use</h2>
+          <ol>
+              <li>Upload a video file (drag & drop or select).</li>
+              <li>Optional: Use the "Adjust" -section to crop your video from start to end.</li>
+              <li>Choose an output Format (Desktop, Phone, Square or Custom dimensions). Rotate the format 90° if needed with the icon next to the Format title.</li>
+              <li>Select a generation Mode (see below). Toggle film grain using the icon next to the Mode title.</li>
+              <li>Press "Create Mood".</li>
+              <li>Wait for processing (progress is shown below the output area). You can cancel anytime.</li>
+              <li>Click the final image to open it in a new tab for viewing or saving.</li>
+          </ol>
+          <h2 style="font-size: 2rem; color: var(--gradient-third);">Generation Modes</span></h2>
+          <ul>
+              <li><strong>Color:</strong> Calculates the average color for frames across the video duration, creating vertical stripes.</li>
+              <li><strong>Stretch:</strong> Takes a 1-pixel wide slice from the center of frames and stretches it vertically, resulting in sharp, distinct columns.</li>
+              <li><strong>Gradient:</strong> Similar to Stretch, but uses image smoothing for softer transitions between the stretched frame slices.</li>
+              <li><strong>Pixel:</strong> Calculates the average color of frames corresponding to grid cells, filling each cell with that color for a pixelated look.</li>
+          </ul>
+          <div class="modal-footer">
+              <a href="https://github.com/your-repo-link" target="_blank" rel="noopener noreferrer" title="View on GitHub">
+                  <i class="ri-github-fill"></i>
+              </a>
+          </div>
+      </div>
+  </div>
+
+
   <script>
-    // Master Help button logic
-    const infoButton = document.getElementById("infoButton");
-    infoButton.addEventListener("click", (e) => {
-      e.stopPropagation();
-      document.body.classList.toggle("info-mode");
-    });
-    document.addEventListener("click", () => {
-      if(document.body.classList.contains("info-mode")){
-        document.body.classList.remove("info-mode");
-      }
-    });
-    
-    // Global variables for generation and cancellation
-    let generationStartTime = null;
-    let elapsedInterval = null;
-    let currentSliceGlobal = 0;
-    let generationComplete = false;
-    let isGenerating = false;
-    let cancelRequested = false;
+    // Variables for DOM elements
+    const infoButton = document.getElementById("infoButton"), helpModalOverlay = document.getElementById("helpModalOverlay"), helpModalContent = document.getElementById("helpModalContent"), closeHelpModal = document.getElementById("closeHelpModal");
+    const videoInput = document.getElementById("videoInput"), video = document.getElementById("video"), manualVideo = document.getElementById("manualVideo"), frameCanvas = document.getElementById("frameCanvas"), resultCanvas = document.getElementById("resultCanvas"), moodButton = document.getElementById("moodButton"), selectFileButton = document.getElementById("selectFileButton"), dropZone = document.getElementById("dropZone"), dropZoneText = document.getElementById("dropZoneText"), setStartButton = document.getElementById("setStartButton"), setEndButton = document.getElementById("setEndButton"), loadingBar = document.getElementById("loadingBar"), loadingBarContainer = document.getElementById("loadingBarContainer"), rotateButton = document.getElementById("rotateButton"), customSizeInputs = document.getElementById("customSizeInputs"), customWidthInput = document.getElementById("customWidthInput"), customHeightInput = document.getElementById("customHeightInput"), filmGrainButton = document.getElementById("filmGrainButton");
+    const generationSpinner = document.getElementById("generationSpinner"); // Added spinner element
+
+    // State variables
+    let generationStartTime, elapsedInterval, currentSliceGlobal = 0, generationComplete = false, isGenerating = false, cancelRequested = false;
     let baseImageData = null;
     let cleanBaseImageData = null;
     let cropData = null;
     let finalImageBlobURL = null;
-    let loadingInterval = null;
-    let smoothingEnabledGlobal = true;
-    
-    const resolutionPresets = {
-      "Desktop": { width: 3200, height: 1800 },
-      "Phone": { width: 1500, height: 3000 },
-      "Poster": { width: 3000, height: 4500 },
-      "Square": { width: 2000, height: 2000 }
+    let loadingInterval;
+    let cancelTimeoutId = null;
+
+    const generationCache = new Map();
+
+    const resolutionPresets = { "Desktop": { width: 3200, height: 1800 }, "Phone": { width: 1500, height: 3000 }, "Square": { width: 2000, height: 2000 }, "Custom": { width: 1920, height: 1080 } };
+    let selectedPreset = "Desktop", rotationEnabled = false;
+
+    // --- Cache Helper ---
+    const generateCacheKey = () => {
+        const res = getEffectiveResolution();
+        const mode = getSelectedMode();
+        const preset = selectedPreset === 'Custom' ? `Custom_${res.width}x${res.height}` : selectedPreset;
+        return `${preset}_${rotationEnabled}_${mode}`;
     };
-    let selectedPreset = "Desktop";
-    let rotationEnabled = false;
-    function getEffectiveResolution() {
-      let res = resolutionPresets[selectedPreset];
-      if (selectedPreset !== "Square" && rotationEnabled) {
-        return { width: res.height, height: res.width };
-      }
-      return res;
-    }
-    
-    function updateElapsedTime() {
-      if (generationComplete || !generationStartTime) return;
-      const elapsed = (Date.now() - generationStartTime) / 1000;
-      const res = getEffectiveResolution();
-      let totalSamples;
-      if (getSelectedMode() === "pixel") {
-        const cellSize = 100;
-        const cols = Math.ceil(res.width / cellSize);
-        const rows = Math.ceil(res.height / cellSize);
-        totalSamples = cols * rows;
-      } else {
-        totalSamples = res.width;
-      }
-      const timeEl = document.getElementById("timeElapsed");
-      if (currentSliceGlobal > 0) {
-        const estimatedTotal = elapsed * totalSamples / currentSliceGlobal;
-        const remaining = Math.max(0, estimatedTotal - elapsed);
-        timeEl.textContent = "Time remaining: " + Math.round(remaining) + " seconds";
-      } else {
-        timeEl.textContent = "Time remaining: calculating...";
-      }
-    }
-    function startElapsedTimer() {
-      generationComplete = false;
-      generationStartTime = Date.now();
-      document.getElementById("timeElapsed").style.display = "block";
-      elapsedInterval = setInterval(updateElapsedTime, 1000);
-    }
-    function stopElapsedTimer() {
-      clearInterval(elapsedInterval);
-      elapsedInterval = null;
-      generationComplete = true;
-    }
-    
-    const videoInput = document.getElementById("videoInput");
-    const video = document.getElementById("video");
-    const manualVideo = document.getElementById("manualVideo");
-    const frameCanvas = document.getElementById("frameCanvas");
-    const resultCanvas = document.getElementById("resultCanvas");
-    const moodButton = document.getElementById("moodButton");
-    const selectFileButton = document.getElementById("selectFileButton");
-    const dropZone = document.getElementById("dropZone");
-    const dropZoneText = document.getElementById("dropZoneText");
-    const setStartButton = document.getElementById("setStartButton");
-    const setEndButton = document.getElementById("setEndButton");
-    const filmGrainToggle = document.getElementById("filmGrainToggle");
-    
-    videoInput.addEventListener("change", (e) => {
-      const file = e.target.files[0];
-      if (file) {
-        video.src = URL.createObjectURL(file);
-        manualVideo.src = video.src;
-        dropZoneText.textContent = file.name;
-        dropZoneText.style.marginBottom = "1em";
-        selectFileButton.textContent = "File selected";
-        dropZone.style.backgroundColor = "#151515";
-        document.getElementById("uploadIcon").innerHTML =
-          `<svg viewBox="0 0 24 24"><path d="M9 16.2l-3.5-3.5L4 14.2l5 5 12-12-1.4-1.4z"/></svg>`;
-        startLoadingBar();
-        video.addEventListener("loadedmetadata", () => {
-          stopLoadingBar();
-          // Set the "End" input to the video's duration (last frame)
-          document.getElementById("endTimeInput").value = Math.floor(video.duration);
-        }, { once: true });
-      }
-    });
-    dropZone.addEventListener("click", () => videoInput.click());
-    selectFileButton.addEventListener("click", (e) => {
-      e.stopPropagation();
-      videoInput.click();
-    });
-    dropZone.addEventListener("dragover", (e) => {
-      e.preventDefault();
-      dropZone.classList.add("hover");
-    });
-    dropZone.addEventListener("dragleave", (e) => {
-      e.preventDefault();
-      dropZone.classList.remove("hover");
-    });
-    dropZone.addEventListener("drop", (e) => {
-      e.preventDefault();
-      dropZone.classList.remove("hover");
-      const file = e.dataTransfer.files[0];
-      if (file) {
-        video.src = URL.createObjectURL(file);
-        manualVideo.src = video.src;
-        dropZoneText.textContent = file.name;
-        dropZoneText.style.marginBottom = "1em";
-        selectFileButton.textContent = "File selected";
-        dropZone.style.backgroundColor = "#151515";
-        document.getElementById("uploadIcon").innerHTML =
-          `<svg viewBox="0 0 24 24"><path d="M9 16.2l-3.5-3.5L4 14.2l5 5 12-12-1.4-1.4z"/></svg>`;
-        startLoadingBar();
-        video.addEventListener("loadedmetadata", () => {
-          stopLoadingBar();
-          // Set the "End" input to the video's duration
-          document.getElementById("endTimeInput").value = Math.floor(video.duration);
-        }, { once: true });
-      }
-    });
-    function startLoadingBar() {
-      loadingBar.style.width = "0%";
-      loadingBarContainer.style.display = "block";
-      let progress = 0;
-      loadingInterval = setInterval(() => {
-        progress += 5;
-        if (progress > 95) progress = 95;
-        loadingBar.style.width = progress + "%";
-      }, 100);
-    }
-    function stopLoadingBar() {
-      if (loadingInterval) {
-        clearInterval(loadingInterval);
-        loadingInterval = null;
-      }
-      loadingBar.style.width = "100%";
-      setTimeout(() => { loadingBarContainer.style.display = "none"; }, 500);
-    }
-    const loadingBar = document.getElementById("loadingBar");
-    const loadingBarContainer = document.getElementById("loadingBarContainer");
-    
-    resultCanvas.addEventListener("click", () => {
-      if (finalImageBlobURL) window.open(finalImageBlobURL, "_blank");
-    });
-    
-    function applyFilmGrainOverlay(ctx, width, height, alpha = 0.3) {
-      const noiseCanvas = document.createElement("canvas");
-      noiseCanvas.width = width;
-      noiseCanvas.height = height;
-      const noiseCtx = noiseCanvas.getContext("2d");
-      const noiseImageData = noiseCtx.createImageData(width, height);
-      const data = noiseImageData.data;
-      for (let i = 0; i < data.length; i += 4) {
-        const value = Math.floor(Math.random() * 256);
-        data[i] = value;
-        data[i + 1] = value;
-        data[i + 2] = value;
-        data[i + 3] = 128;
-      }
-      noiseCtx.putImageData(noiseImageData, 0, 0);
-      ctx.save();
-      ctx.globalCompositeOperation = "overlay";
-      ctx.globalAlpha = alpha;
-      ctx.drawImage(noiseCanvas, 0, 0, width, height);
-      ctx.restore();
-    }
-    
-    function removeBlackBarsFromImage(canvas) {
-      const ctx = canvas.getContext("2d");
-      const width = canvas.width;
-      const height = canvas.height;
-      const imageData = ctx.getImageData(0, 0, width, height);
-      const data = imageData.data;
-      const pixelThreshold = 20;
-      const blackRatio = 0.95;
-      let topCrop = 0;
-      let bottomCrop = height;
-      for (let y = 0; y < height; y++) {
-        let blackCount = 0;
-        for (let x = 0; x < width; x++) {
-          const idx = (y * width + x) * 4;
-          const lum = 0.2126 * data[idx] + 0.7152 * data[idx+1] + 0.0722 * data[idx+2];
-          if (lum < pixelThreshold) blackCount++;
-        }
-        if ((blackCount / width) < blackRatio) { topCrop = y; break; }
-      }
-      for (let y = height - 1; y >= 0; y--) {
-        let blackCount = 0;
-        for (let x = 0; x < width; x++) {
-          const idx = (y * width + x) * 4;
-          const lum = 0.2126 * data[idx] + 0.7152 * data[idx+1] + 0.0722 * data[idx+2];
-          if (lum < pixelThreshold) blackCount++;
-        }
-        if ((blackCount / width) < blackRatio) { bottomCrop = y; break; }
-      }
-      const cropHeight = bottomCrop - topCrop;
-      const tempCanvas = document.createElement("canvas");
-      tempCanvas.width = width;
-      tempCanvas.height = cropHeight;
-      tempCanvas.getContext("2d").drawImage(canvas, 0, topCrop, width, cropHeight, 0, 0, width, cropHeight);
-      return tempCanvas;
-    }
-    
-    function updatePlaceholderImage() {
-      const res = getEffectiveResolution();
-      resultCanvas.width = res.width;
-      resultCanvas.height = res.height;
-      const ctx = resultCanvas.getContext("2d");
-      ctx.fillStyle = "#000";
-      ctx.fillRect(0, 0, res.width, res.height);
-      baseImageData = ctx.getImageData(0, 0, res.width, res.height);
-      applyPostGenerationEffects();
-    }
-    
-    function applyPostGenerationEffects() {
-      const ctx = resultCanvas.getContext("2d");
-      ctx.putImageData(baseImageData, 0, 0);
-      resultCanvas.toBlob((blob) => {
-        if (blob) {
-          if (finalImageBlobURL) URL.revokeObjectURL(finalImageBlobURL);
-          finalImageBlobURL = URL.createObjectURL(blob);
-        }
-      }, "image/png");
-    }
-    
-    function updateFinalImageBlobURL() {
-      stopElapsedTimer();
-      const ctx = resultCanvas.getContext("2d");
-      if (cleanBaseImageData) {
-        ctx.putImageData(cleanBaseImageData, 0, 0);
-      } else {
-        const croppedCanvas = removeBlackBarsFromImage(resultCanvas);
-        if (croppedCanvas.height < 0.9 * resultCanvas.height) {
-          ctx.clearRect(0, 0, resultCanvas.width, resultCanvas.height);
-          ctx.drawImage(croppedCanvas, 0, 0, resultCanvas.width, resultCanvas.height);
-        }
-        cleanBaseImageData = ctx.getImageData(0, 0, resultCanvas.width, resultCanvas.height);
-      }
-      if (filmGrainToggle.checked) {
-        applyFilmGrainOverlay(ctx, resultCanvas.width, resultCanvas.height);
-      }
-      baseImageData = ctx.getImageData(0, 0, resultCanvas.width, resultCanvas.height);
-      resultCanvas.toBlob((blob) => {
-        if (blob) {
-          if (finalImageBlobURL) URL.revokeObjectURL(finalImageBlobURL);
-          finalImageBlobURL = URL.createObjectURL(blob);
-          resultCanvas.style.animation = "previewGlow 2s ease";
-          setTimeout(() => { resultCanvas.style.animation = ""; }, 2000);
-        }
-      }, "image/png");
-      // Reset button text to "Create Mood"
-      moodButton.textContent = "Create Mood";
-      moodButton.classList.remove("cancel-mode");
-      isGenerating = false;
-      cancelRequested = false;
-    }
-    
-    function shouldCancel() {
-      if (cancelRequested) {
-        updateFinalImageBlobURL();
-        return true;
-      }
-      return false;
-    }
-    
-    function processVideo16x9(crop, effectiveStart, effectiveEnd) {
-      finalImageBlobURL = null;
-      cleanBaseImageData = null;
-      currentSliceGlobal = 0;
-      const res = getEffectiveResolution();
-      resultCanvas.width = res.width;
-      resultCanvas.height = res.height;
-      const totalSlices = res.width;
-      const resultCtx = resultCanvas.getContext("2d");
-      if (!crop) {
-        frameCanvas.width = video.videoWidth;
-        frameCanvas.height = video.videoHeight;
-      }
-      const frameCtx = frameCanvas.getContext("2d");
-      frameCtx.imageSmoothingEnabled = smoothingEnabledGlobal;
-      let currentSlice = 0;
-      startElapsedTimer();
-      function processSlice() {
-        if (shouldCancel()) return;
-        if (currentSlice >= totalSlices) {
-          updateFinalImageBlobURL();
-          return;
-        }
-        currentSliceGlobal = currentSlice;
-        let targetTime = effectiveStart + (currentSlice / totalSlices) * (effectiveEnd - effectiveStart) + 0.0001;
-        video.currentTime = targetTime;
-        video.addEventListener("seeked", function onSeeked() {
-          if (shouldCancel()) return;
-          frameCtx.imageSmoothingEnabled = smoothingEnabledGlobal;
-          if (crop) {
-            frameCtx.drawImage(video, crop.cropX, crop.cropY, crop.cropWidth, crop.cropHeight, 0, 0, crop.cropWidth, crop.cropHeight);
-          } else {
-            frameCtx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
-          }
-          const imageData = frameCtx.getImageData(0, 0, frameCanvas.width, frameCanvas.height);
-          let r = 0, g = 0, b = 0, count = 0;
-          for (let i = 0; i < imageData.data.length; i += 4) {
-            r += imageData.data[i];
-            g += imageData.data[i+1];
-            b += imageData.data[i+2];
-            count++;
-          }
-          r = Math.floor(r / count);
-          g = Math.floor(g / count);
-          b = Math.floor(b / count);
-          let tempCanvas = document.createElement("canvas");
-          tempCanvas.width = 1;
-          tempCanvas.height = 1;
-          let tempCtx = tempCanvas.getContext("2d");
-          tempCtx.fillStyle = `rgb(${r}, ${g}, ${b})`;
-          tempCtx.fillRect(0, 0, 1, 1);
-          resultCtx.imageSmoothingEnabled = false;
-          resultCtx.drawImage(tempCanvas, 0, 0, 1, 1, currentSlice, 0, 1, res.height);
-          currentSlice++;
-          video.removeEventListener("seeked", onSeeked);
-          processSlice();
-        }, { once: true });
-      }
-      processSlice();
-    }
-    
-    function processVideoExperimental(crop, effectiveStart, effectiveEnd) {
-      finalImageBlobURL = null;
-      cleanBaseImageData = null;
-      currentSliceGlobal = 0;
-      const res = getEffectiveResolution();
-      resultCanvas.width = res.width;
-      resultCanvas.height = res.height;
-      const totalSlices = res.width;
-      const resultCtx = resultCanvas.getContext("2d");
-      if (!crop) {
-        frameCanvas.width = video.videoWidth;
-        frameCanvas.height = video.videoHeight;
-      }
-      const frameCtx = frameCanvas.getContext("2d");
-      frameCtx.imageSmoothingEnabled = smoothingEnabledGlobal;
-      if (smoothingEnabledGlobal) frameCtx.imageSmoothingQuality = "high";
-      const tempCanvas = document.createElement("canvas");
-      tempCanvas.width = 1;
-      tempCanvas.height = res.height;
-      const tempCtx = tempCanvas.getContext("2d");
-      tempCtx.imageSmoothingEnabled = smoothingEnabledGlobal;
-      if (smoothingEnabledGlobal) tempCtx.imageSmoothingQuality = "high";
-      let currentSlice = 0;
-      startElapsedTimer();
-      function processSlice() {
-        if (shouldCancel()) return;
-        if (currentSlice >= totalSlices) {
-          updateFinalImageBlobURL();
-          return;
-        }
-        currentSliceGlobal = currentSlice;
-        let targetTime = effectiveStart + (currentSlice / totalSlices) * (effectiveEnd - effectiveStart) + 0.0001;
-        video.currentTime = targetTime;
-        video.addEventListener("seeked", function onSeeked() {
-          if (shouldCancel()) return;
-          frameCtx.imageSmoothingEnabled = smoothingEnabledGlobal;
-          if (smoothingEnabledGlobal) frameCtx.imageSmoothingQuality = "high";
-          if (crop) {
-            frameCtx.drawImage(video, crop.cropX, crop.cropY, crop.cropWidth, crop.cropHeight, 0, 0, crop.cropWidth, crop.cropHeight);
-          } else {
-            frameCtx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
-          }
-          tempCtx.clearRect(0, 0, 1, res.height);
-          tempCtx.drawImage(frameCanvas, 0, 0, frameCanvas.width, frameCanvas.height, 0, 0, 1, res.height);
-          resultCtx.drawImage(tempCanvas, 0, 0, 1, res.height, currentSlice, 0, 1, res.height);
-          currentSlice++;
-          video.removeEventListener("seeked", onSeeked);
-          processSlice();
-        }, { once: true });
-      }
-      processSlice();
-    }
-    
-    function processVideoMedian(crop, effectiveStart, effectiveEnd) {
-      finalImageBlobURL = null;
-      cleanBaseImageData = null;
-      currentSliceGlobal = 0;
-      const res = getEffectiveResolution();
-      resultCanvas.width = res.width;
-      resultCanvas.height = res.height;
-      const totalSlices = res.width;
-      const resultCtx = resultCanvas.getContext("2d");
-      let offCanvas = document.createElement("canvas");
-      offCanvas.width = 1;
-      offCanvas.height = res.height;
-      let offCtx = offCanvas.getContext("2d");
-      offCtx.imageSmoothingEnabled = smoothingEnabledGlobal;
-      if (smoothingEnabledGlobal) offCtx.imageSmoothingQuality = "high";
-      let currentSlice = 0;
-      startElapsedTimer();
-      function processSlice() {
-        if (shouldCancel()) return;
-        if (currentSlice >= totalSlices) {
-          updateFinalImageBlobURL();
-          return;
-        }
-        currentSliceGlobal = currentSlice;
-        let targetTime = effectiveStart + (currentSlice / totalSlices) * (effectiveEnd - effectiveStart) + 0.0001;
-        video.currentTime = targetTime;
-        video.addEventListener("seeked", function onSeeked() {
-          if (shouldCancel()) return;
-          offCtx.imageSmoothingEnabled = smoothingEnabledGlobal;
-          if (smoothingEnabledGlobal) offCtx.imageSmoothingQuality = "high";
-          if (crop) {
-            offCtx.drawImage(video, crop.cropX, crop.cropY, crop.cropWidth, crop.cropHeight, 0, 0, 1, res.height);
-          } else {
-            offCtx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight, 0, 0, 1, res.height);
-          }
-          let imgData = offCtx.getImageData(0, 0, 1, res.height);
-          let data = imgData.data;
-          for (let y = 1; y < res.height - 1; y++) {
-            for (let c = 0; c < 3; c++) {
-              let idx = y * 4 + c;
-              let neighbors = [data[idx - 4], data[idx], data[idx + 4]];
-              neighbors.sort((a, b) => a - b);
-              data[idx] = neighbors[1];
-            }
-          }
-          offCtx.putImageData(imgData, 0, 0);
-          resultCtx.drawImage(offCanvas, 0, 0, 1, res.height, currentSlice, 0, 1, res.height);
-          currentSlice++;
-          video.removeEventListener("seeked", onSeeked);
-          processSlice();
-        }, { once: true });
-      }
-      processSlice();
-    }
-    
-    function processVideoPixel(crop, effectiveStart, effectiveEnd) {
-      finalImageBlobURL = null;
-      cleanBaseImageData = null;
-      currentSliceGlobal = 0;
-      const res = getEffectiveResolution();
-      resultCanvas.width = res.width;
-      resultCanvas.height = res.height;
-      const cellSize = 100;
-      const cols = Math.ceil(res.width / cellSize);
-      const rows = Math.ceil(res.height / cellSize);
-      const totalCells = cols * rows;
-      const resultCtx = resultCanvas.getContext("2d");
-      resultCtx.imageSmoothingEnabled = false;
-      if (!crop) {
-        frameCanvas.width = video.videoWidth;
-        frameCanvas.height = video.videoHeight;
-      }
-      const frameCtx = frameCanvas.getContext("2d");
-      frameCtx.imageSmoothingEnabled = smoothingEnabledGlobal;
-      let cellIndex = 0;
-      startElapsedTimer();
-      function processNextCell() {
-        if (shouldCancel()) return;
-        if (cellIndex >= totalCells) {
-          updateFinalImageBlobURL();
-          return;
-        }
-        currentSliceGlobal = cellIndex;
-        let tMid = effectiveStart + ((cellIndex + 0.5) / totalCells) * (effectiveEnd - effectiveStart) + 0.0001;
-        video.currentTime = tMid;
-        video.addEventListener("seeked", function onSeeked() {
-          if (shouldCancel()) return;
-          if (crop) {
-            frameCtx.drawImage(video, crop.cropX, crop.cropY, crop.cropWidth, crop.cropHeight, 0, 0, crop.cropWidth, crop.cropHeight);
-          } else {
-            frameCtx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
-          }
-          const imageData = frameCtx.getImageData(0, 0, frameCanvas.width, frameCanvas.height);
-          let r = 0, g = 0, b = 0, count = 0;
-          for (let i = 0; i < imageData.data.length; i += 4) {
-            r += imageData.data[i];
-            g += imageData.data[i+1];
-            b += imageData.data[i+2];
-            count++;
-          }
-          r = Math.floor(r / count);
-          g = Math.floor(g / count);
-          b = Math.floor(b / count);
-          const col = cellIndex % cols;
-          const row = Math.floor(cellIndex / cols);
-          resultCtx.fillStyle = `rgb(${r}, ${g}, ${b})`;
-          resultCtx.fillRect(col * cellSize, row * cellSize, cellSize, cellSize);
-          cellIndex++;
-          video.removeEventListener("seeked", onSeeked);
-          processNextCell();
-        }, { once: true });
-      }
-      processNextCell();
-    }
-    
-    function getSelectedMode() {
-      const radios = document.getElementsByName("modePreset");
-      for (let i = 0; i < radios.length; i++) {
-        if (radios[i].checked) { return radios[i].value; }
-      }
-      return "color";
-    }
-    
-    moodButton.addEventListener("click", () => {
-      if (!video.src) {
-        alert("Please select or drop a video file first.");
-        return;
-      }
-      if (isGenerating) {
-        cancelRequested = true;
-      } else {
-        isGenerating = true;
-        cancelRequested = false;
-        cleanBaseImageData = null;
-        // Change button text to "Cancel" when generating
-        moodButton.innerHTML = '<span class="mood">Cancel</span>';
-        moodButton.classList.add("cancel-mode");
-        const selectedMode = getSelectedMode();
-        smoothingEnabledGlobal = (selectedMode !== "color");
-        let processFunc = null;
-        switch (selectedMode) {
-          case "color":
-            processFunc = processVideo16x9;
-            break;
-          case "gradient":
-            processFunc = processVideoExperimental;
-            break;
-          case "stretch":
-            processFunc = processVideoMedian;
-            break;
-          case "pixel":
-            processFunc = processVideoPixel;
-            break;
-          default:
-            processFunc = processVideo16x9;
-        }
-        runProcess(processFunc);
-      }
-    });
-    
-    function runProcess(processFunc) {
-      startElapsedTimer();
-      detectCropBoundaries(() => { processWithCropAndRange(processFunc); });
-    }
-    
-    function processWithCropAndRange(processFunc) {
-      let startVal = parseFloat(document.getElementById("startTimeInput").value);
-      let endVal = parseFloat(document.getElementById("endTimeInput").value);
-      const effectiveStart = isNaN(startVal) ? 0 : startVal;
-      const effectiveEnd = isNaN(endVal) ? video.duration : endVal;
-      processFunc(cropData, effectiveStart, effectiveEnd);
-    }
-    
-    function detectCropBoundaries(callback) {
-      video.currentTime = video.duration / 2;
-      video.addEventListener("seeked", function onSeeked() {
-        frameCanvas.width = video.videoWidth;
-        frameCanvas.height = video.videoHeight;
-        const ctx = frameCanvas.getContext("2d");
-        ctx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
-        const imageData = ctx.getImageData(0, 0, video.videoWidth, video.videoHeight);
-        const data = imageData.data;
-        const width = video.videoWidth;
-        const height = video.videoHeight;
-        const pixelThreshold = 20;
-        const blackRatio = 0.95;
-        let topCrop = 0;
-        let bottomCrop = height;
-        for (let y = 0; y < height; y++) {
-          let blackCount = 0;
-          for (let x = 0; x < width; x++) {
-            const i = (y * width + x) * 4;
-            const lum = 0.2126 * data[i] + 0.7152 * data[i+1] + 0.0722 * data[i+2];
-            if (lum < pixelThreshold) { blackCount++; }
-          }
-          if ((blackCount / width) < blackRatio) { topCrop = y; break; }
-        }
-        for (let y = height - 1; y >= 0; y--) {
-          let blackCount = 0;
-          for (let x = 0; x < width; x++) {
-            const i = (y * width + x) * 4;
-            const lum = 0.2126 * data[i] + 0.7152 * data[i+1] + 0.0722 * data[i+2];
-            if (lum < pixelThreshold) { blackCount++; }
-          }
-          if ((blackCount / width) < blackRatio) { bottomCrop = y; break; }
-        }
-        const cropHeight = bottomCrop - topCrop;
-        const crop = { cropX: 0, cropY: topCrop, cropWidth: width, cropHeight: cropHeight };
-        frameCanvas.width = crop.cropWidth;
-        frameCanvas.height = crop.cropHeight;
-        cropData = crop;
-        video.removeEventListener("seeked", onSeeked);
-        callback(crop);
-      }, { once: true });
-    }
-    
-    const sizeRadios = document.getElementsByName("sizePreset");
-    for (let i = 0; i < sizeRadios.length; i++) {
-      sizeRadios[i].addEventListener("change", () => {
-        selectedPreset = document.querySelector('input[name="sizePreset"]:checked').value;
-        if (selectedPreset === "Square") {
-          document.getElementById("rotationToggle").checked = false;
-          rotationEnabled = false;
-          document.getElementById("rotationToggle").disabled = true;
+
+    // --- Resolution & Settings ---
+    const getEffectiveResolution = (preset = selectedPreset, customW = customWidthInput.value, customH = customHeightInput.value, rotated = rotationEnabled) => {
+        let w, h;
+        if (preset === "Custom") {
+            w = parseInt(customW, 10) || resolutionPresets.Custom.width;
+            h = parseInt(customH, 10) || resolutionPresets.Custom.height;
+            w = Math.max(100, w);
+            h = Math.max(100, h);
         } else {
-          document.getElementById("rotationToggle").disabled = false;
+            const pData = resolutionPresets[preset];
+            w = pData.width;
+            h = pData.height;
         }
-        updatePlaceholderImage();
-      });
-    }
-    document.getElementById("rotationToggle").addEventListener("change", (e) => {
-      rotationEnabled = e.target.checked;
-      updatePlaceholderImage();
+        const isSquareAspect = w === h;
+        if (!isSquareAspect && rotated) {
+            return { width: h, height: w };
+        }
+        return { width: w, height: h };
+    };
+
+    const getSelectedMode = () => document.querySelector('input[name="modePreset"]:checked')?.value || "color";
+
+    // --- UI Updates & Timers ---
+    const updateElapsedTime = () => { if (generationComplete || !generationStartTime) return; const elapsed = (Date.now() - generationStartTime) / 1000, res = getEffectiveResolution(), timeEl = document.getElementById("timeElapsed"); let totalSamples; const mode = getSelectedMode(); if (mode === "pixel") { const cellSize = 100, cols = Math.ceil(res.width / cellSize), rows = Math.ceil(res.height / cellSize); totalSamples = cols * rows; } else { totalSamples = res.width; } if (currentSliceGlobal > 0 && totalSamples > 0) { const progress = currentSliceGlobal / totalSamples, estimatedTotal = elapsed / progress, remaining = Math.max(0, estimatedTotal - elapsed); timeEl.textContent = `Time remaining: ~${Math.round(remaining)}s (${Math.round(progress * 100)}%)`; } else { timeEl.textContent = "Time remaining: calculating..."; } };
+    const startElapsedTimer = () => { generationComplete = false; generationStartTime = Date.now(); document.getElementById("timeElapsed").style.display = "block"; document.getElementById("timeElapsed").textContent = "Time remaining: calculating..."; elapsedInterval = setInterval(updateElapsedTime, 1000); };
+    const stopElapsedTimer = () => { clearInterval(elapsedInterval); elapsedInterval = null; generationComplete = true; if (generationStartTime) { const finalElapsed = (Date.now() - generationStartTime) / 1000; document.getElementById("timeElapsed").textContent = cancelRequested ? 'Cancelled' : `Finished in ${Math.round(finalElapsed)}s`; }};
+    const startLoadingBar = () => { if (loadingInterval) clearInterval(loadingInterval); loadingBar.style.width = "0%"; loadingBarContainer.style.display = "block"; let p = 0; loadingInterval = setInterval(() => { p += 5; loadingBar.style.width = `${Math.min(p, 95)}%`; if (p >= 100) clearInterval(loadingInterval); }, 100); };
+    const stopLoadingBar = (force = false) => { if (loadingInterval) { clearInterval(loadingInterval); loadingInterval = null; } loadingBar.style.width = "100%"; setTimeout(() => { loadingBarContainer.style.display = "none"; loadingBar.style.width = "0%"; }, force ? 0 : 500); };
+
+    // --- File Handling ---
+    const handleFile = file => { if (file && file.type.startsWith('video/')) { if (cancelTimeoutId) clearTimeout(cancelTimeoutId); cancelTimeoutId = null; const url = URL.createObjectURL(file); video.src = url; manualVideo.src = url; dropZoneText.textContent = file.name; selectFileButton.textContent = "File selected"; selectFileButton.classList.add("file-selected"); dropZone.style.backgroundColor = "var(--primary-bg-card)"; document.getElementById("uploadIcon").innerHTML = `<i class="ri-file-check-line" style="font-size: 24px;"></i>`; startLoadingBar(); generationCache.clear(); updateCheckmarks(); video.addEventListener("loadedmetadata", () => { stopLoadingBar(); document.getElementById("endTimeInput").value = Math.floor(video.duration); document.getElementById("startTimeInput").value = 0; displayCurrentSettingsResult(); }, { once: true }); video.addEventListener('error', () => { alert("Error loading video."); stopLoadingBar(true); resetUploadUI(); }); } else if (file) { alert("Please select a valid video file."); } };
+    const resetUploadUI = () => { if (cancelTimeoutId) clearTimeout(cancelTimeoutId); cancelTimeoutId = null; dropZoneText.textContent = "Drag and drop or select a video file to upload"; selectFileButton.textContent = "Select file"; selectFileButton.classList.remove("file-selected"); dropZone.style.backgroundColor = "var(--primary-bg)"; document.getElementById("uploadIcon").innerHTML = `<i class="ri-file-check-line" style="font-size: 24px;"></i>`; video.src = ""; manualVideo.src = ""; document.getElementById("startTimeInput").value = 0; document.getElementById("endTimeInput").value = ""; generationCache.clear(); updateCheckmarks(); displayCurrentSettingsResult(); };
+
+    // --- Image Generation & Display ---
+    const applyFilmGrainOverlay = (ctx, w, h, alpha = 0.3) => { const noiseCanvas = document.createElement("canvas"); noiseCanvas.width = w; noiseCanvas.height = h; const noiseCtx = noiseCanvas.getContext("2d"), noiseImageData = noiseCtx.createImageData(w, h), data = noiseImageData.data; for (let i = 0; i < data.length; i += 4) { const v = Math.random() * 255; data[i] = data[i + 1] = data[i + 2] = v; data[i + 3] = 100 + Math.random() * 50; } noiseCtx.putImageData(noiseImageData, 0, 0); ctx.save(); ctx.globalCompositeOperation = "overlay"; ctx.globalAlpha = alpha; ctx.drawImage(noiseCanvas, 0, 0, w, h); ctx.restore(); };
+    const updatePlaceholderImage = (width, height) => { resultCanvas.width = width; resultCanvas.height = height; const ctx = resultCanvas.getContext("2d", { alpha: false }); ctx.fillStyle = "var(--primary-bg)"; ctx.fillRect(0, 0, width, height); if (video.videoWidth && video.videoHeight && video.duration > 0) { const videoAspect = video.videoWidth / video.videoHeight, canvasAspect = width / height; let dw, dh, dx, dy; if (videoAspect > canvasAspect) { dw = width; dh = width / videoAspect; dx = 0; dy = (height - dh) / 2; } else { dh = height; dw = height * videoAspect; dy = 0; dx = (width - dw) / 2; } ctx.fillStyle = "rgba(255, 255, 255, 0.05)"; ctx.fillRect(dx, dy, dw, dh); ctx.strokeStyle = "rgba(255, 255, 255, 0.1)"; ctx.strokeRect(dx, dy, dw, dh); } cleanBaseImageData = null; baseImageData = null; finalImageBlobURL = null; document.getElementById("timeElapsed").style.display = 'none'; };
+    const displayCurrentSettingsResult = () => { if (isGenerating) return; const cacheKey = generateCacheKey(); const ctx = resultCanvas.getContext("2d", { alpha: false }); if (generationCache.has(cacheKey)) { const cachedResult = generationCache.get(cacheKey); resultCanvas.width = cachedResult.width; resultCanvas.height = cachedResult.height; ctx.putImageData(cachedResult.imageData, 0, 0); baseImageData = cachedResult.imageData; cleanBaseImageData = cachedResult.isComplete ? cachedResult.imageData : null; if (filmGrainButton.classList.contains('active')) { applyFilmGrainOverlay(ctx, resultCanvas.width, resultCanvas.height, 0.15); } if (finalImageBlobURL) URL.revokeObjectURL(finalImageBlobURL); finalImageBlobURL = cachedResult.blobURL; document.getElementById("timeElapsed").textContent = cachedResult.isComplete ? 'Mood Complete' : 'Mood Cancelled)'; document.getElementById("timeElapsed").style.display = 'block'; } else { const res = getEffectiveResolution(); updatePlaceholderImage(res.width, res.height); } };
+    const finalizeGeneration = (forceCancelledState = false) => {
+        if (cancelTimeoutId) { clearTimeout(cancelTimeoutId); cancelTimeoutId = null; }
+        generationSpinner.classList.remove('spinner-active'); // Hide spinner
+        stopElapsedTimer();
+        const wasCompleted = forceCancelledState ? false : !cancelRequested;
+        const ctx = resultCanvas.getContext("2d", { alpha: false });
+        const imageDataForCache = baseImageData;
+        if (imageDataForCache) {
+            const cacheKey = generateCacheKey();
+            const currentWidth = resultCanvas.width;
+            const currentHeight = resultCanvas.height;
+            if (filmGrainButton.classList.contains('active')) {
+                applyFilmGrainOverlay(ctx, currentWidth, currentHeight, 0.15);
+            }
+            resultCanvas.toBlob(blob => {
+                if (finalImageBlobURL) URL.revokeObjectURL(finalImageBlobURL);
+                let newBlobURL = null;
+                if (blob) {
+                    newBlobURL = URL.createObjectURL(blob);
+                    finalImageBlobURL = newBlobURL;
+                } else {
+                    finalImageBlobURL = null;
+                }
+                generationCache.set(cacheKey, { imageData: imageDataForCache, blobURL: newBlobURL, width: currentWidth, height: currentHeight, isComplete: wasCompleted });
+                updateCheckmarks();
+                if (filmGrainButton.classList.contains('active')) {
+                    const restoreCtx = resultCanvas.getContext('2d', { alpha: false });
+                    restoreCtx.putImageData(imageDataForCache, 0, 0);
+                }
+                if (wasCompleted) {
+                    cleanBaseImageData = imageDataForCache;
+                    resultCanvas.style.animation = "previewGlow 1.5s ease-out";
+                    setTimeout(() => { resultCanvas.style.animation = ""; }, 1500);
+                } else {
+                    cleanBaseImageData = null;
+                    document.getElementById("timeElapsed").textContent = 'Cancelled';
+                }
+                baseImageData = imageDataForCache;
+            }, "image/png");
+        } else {
+            console.warn("No image data found to finalize or cache.");
+            if (finalImageBlobURL) URL.revokeObjectURL(finalImageBlobURL);
+            finalImageBlobURL = null;
+            cleanBaseImageData = null;
+            baseImageData = null;
+            displayCurrentSettingsResult();
+            if (!wasCompleted) {
+                document.getElementById("timeElapsed").textContent = 'Cancelled';
+                document.getElementById("timeElapsed").style.display = 'block';
+            }
+        }
+        moodButton.innerHTML = 'Create Mood';
+        moodButton.classList.remove("cancel-mode");
+        isGenerating = false;
+        cancelRequested = false;
+        generationStartTime = null;
+        currentSliceGlobal = 0;
+    };
+    const shouldCancel = () => { if (cancelRequested) { return true; } return false; };
+
+    // --- Processing Functions ---
+    const drawCroppedFrame = (frameCtx, crop) => { frameCanvas.width = crop.cropWidth; frameCanvas.height = crop.cropHeight; frameCtx.drawImage(video, crop.cropX, crop.cropY, crop.cropWidth, crop.cropHeight, 0, 0, frameCanvas.width, frameCanvas.height); };
+    const processVideoCore = (processFrameFn, crop, effectiveStart, effectiveEnd, totalUnits, unitType = 'slice') => { cleanBaseImageData = null; currentSliceGlobal = 0; baseImageData = null; const res = getEffectiveResolution(); resultCanvas.width = res.width; resultCanvas.height = res.height; const resultCtx = resultCanvas.getContext("2d", { alpha: false }); resultCtx.imageSmoothingEnabled = false; resultCtx.fillStyle = 'black'; resultCtx.fillRect(0, 0, res.width, res.height); const frameCtx = frameCanvas.getContext("2d", { willReadFrequently: true }); frameCtx.imageSmoothingEnabled = false; let currentUnit = 0; startElapsedTimer(); function processNextUnit() { if (shouldCancel()) { baseImageData = resultCtx.getImageData(0, 0, res.width, res.height); finalizeGeneration(); return; } if (currentUnit >= totalUnits) { cleanBaseImageData = resultCtx.getImageData(0, 0, res.width, res.height); baseImageData = cleanBaseImageData; finalizeGeneration(); return; } currentSliceGlobal = currentUnit; let timeFraction = (unitType === 'cell') ? ((currentUnit + 0.5) / totalUnits) : (currentUnit / totalUnits); let targetTime = effectiveStart + timeFraction * (effectiveEnd - effectiveStart) + 0.0001; video.currentTime = Math.min(effectiveEnd - 0.001, Math.max(effectiveStart, targetTime)); video.addEventListener("seeked", function onSeeked() { video.removeEventListener("seeked", onSeeked); if (shouldCancel()) { baseImageData = resultCtx.getImageData(0, 0, res.width, res.height); finalizeGeneration(); return; } try { drawCroppedFrame(frameCtx, crop); processFrameFn(resultCtx, frameCtx, currentUnit, res, totalUnits, crop); } catch (e) { console.error("Error processing frame:", e); } currentUnit++; baseImageData = resultCtx.getImageData(0, 0, res.width, res.height); requestAnimationFrame(processNextUnit); }, { once: true }); video.addEventListener('error', e => { console.error("Seek error:", e); currentUnit++; requestAnimationFrame(processNextUnit); video.removeEventListener("seeked", onSeeked); if (shouldCancel()) { baseImageData = resultCtx.getImageData(0, 0, res.width, res.height); finalizeGeneration(); } }, { once: true }); } requestAnimationFrame(processNextUnit); };
+    // Mode-specific frame processing functions
+    const processFrameColor = (resultCtx, frameCtx, currentSlice, res) => { resultCtx.imageSmoothingEnabled = false; const imageData = frameCtx.getImageData(0, 0, frameCanvas.width, frameCanvas.height); let r = 0, g = 0, b = 0, count = imageData.data.length / 4; for (let i = 0; i < imageData.data.length; i += 4) { r += imageData.data[i]; g += imageData.data[i + 1]; b += imageData.data[i + 2]; } r = Math.floor(r / count); g = Math.floor(g / count); b = Math.floor(b / count); resultCtx.fillStyle = `rgb(${r}, ${g}, ${b})`; resultCtx.fillRect(currentSlice, 0, 1, res.height); };
+    const processFrameGradient = (resultCtx, frameCtx, currentSlice, res) => { resultCtx.imageSmoothingEnabled = true; resultCtx.imageSmoothingQuality = "low"; frameCtx.imageSmoothingEnabled = true; frameCtx.imageSmoothingQuality = "low"; const tempCanvas = document.createElement("canvas"); tempCanvas.width = 1; tempCanvas.height = res.height; const tempCtx = tempCanvas.getContext("2d"); tempCtx.imageSmoothingEnabled = true; tempCtx.imageSmoothingQuality = "low"; tempCtx.drawImage(frameCanvas, 0, 0, frameCanvas.width, frameCanvas.height, 0, 0, 1, res.height); resultCtx.drawImage(tempCanvas, currentSlice, 0); };
+    const processFrameStretch = (resultCtx, frameCtx, currentSlice, res) => { resultCtx.imageSmoothingEnabled = false; frameCtx.imageSmoothingEnabled = false; const tempCanvas = document.createElement("canvas"); tempCanvas.width = 1; tempCanvas.height = res.height; const tempCtx = tempCanvas.getContext("2d"); tempCtx.imageSmoothingEnabled = false; const centerCol = Math.max(0, Math.floor(frameCanvas.width / 2)); tempCtx.drawImage(frameCanvas, centerCol, 0, 1, frameCanvas.height, 0, 0, 1, res.height); resultCtx.drawImage(tempCanvas, currentSlice, 0); };
+    const processFramePixel = (resultCtx, frameCtx, cellIndex, res, totalUnits) => { resultCtx.imageSmoothingEnabled = false; const cellSize = 100; const cols = Math.ceil(res.width / cellSize); const imageData = frameCtx.getImageData(0, 0, frameCanvas.width, frameCanvas.height); let r = 0, g = 0, b = 0, count = imageData.data.length / 4; for (let i = 0; i < imageData.data.length; i += 4) { r += imageData.data[i]; g += imageData.data[i + 1]; b += imageData.data[i + 2]; } r = Math.floor(r / count); g = Math.floor(g / count); b = Math.floor(b / count); const col = cellIndex % cols, row = Math.floor(cellIndex / cols); resultCtx.fillStyle = `rgb(${r}, ${g}, ${b})`; resultCtx.fillRect(col * cellSize, row * cellSize, cellSize, cellSize); };
+
+    // --- Main Control Flow ---
+    moodButton.addEventListener("click", () => {
+        if (!video.src || video.readyState < video.HAVE_METADATA) {
+            return alert("Please select and load a video file first.");
+        }
+        if (isGenerating) {
+            if (cancelRequested) return;
+            cancelRequested = true;
+            moodButton.innerHTML = '<span class="mood">Cancelling...</span>';
+            document.getElementById("timeElapsed").textContent = "Cancelling...";
+            if (cancelTimeoutId) clearTimeout(cancelTimeoutId);
+            cancelTimeoutId = setTimeout(() => {
+                if (isGenerating) {
+                    console.warn("Cancel safety net triggered: Forcing UI reset.");
+                    finalizeGeneration(true); // finalizeGeneration now handles spinner
+                }
+                cancelTimeoutId = null;
+            }, 2000);
+        } else {
+            isGenerating = true;
+            generationSpinner.classList.add('spinner-active'); // Show spinner
+            cancelRequested = false;
+            cleanBaseImageData = null;
+            baseImageData = null;
+            currentSliceGlobal = 0;
+            finalImageBlobURL = null;
+            if (cancelTimeoutId) clearTimeout(cancelTimeoutId);
+            cancelTimeoutId = null;
+            moodButton.innerHTML = '<span class="mood">Cancel</span>';
+            moodButton.classList.add("cancel-mode");
+            const res = getEffectiveResolution();
+            updatePlaceholderImage(res.width, res.height);
+            const selectedMode = getSelectedMode();
+            let processFrameFn, totalUnits, unitType;
+            if (selectedMode === "pixel") {
+                const cellSize = 100;
+                const cols = Math.ceil(res.width / cellSize);
+                const rows = Math.ceil(res.height / cellSize);
+                processFrameFn = processFramePixel;
+                totalUnits = cols * rows;
+                unitType = 'cell';
+            } else {
+                totalUnits = res.width;
+                unitType = 'slice';
+                if (selectedMode === "gradient") processFrameFn = processFrameGradient;
+                else if (selectedMode === "stretch") processFrameFn = processFrameStretch;
+                else processFrameFn = processFrameColor;
+            }
+            runProcess(processFrameFn, totalUnits, unitType);
+        }
     });
-    
-    filmGrainToggle.addEventListener("change", () => {
-      updateFinalImageBlobURL();
-    });
-    
+    const runProcess = (processFrameFn, totalUnits, unitType) => { detectCropBoundaries(() => { processWithCropAndRange(processFrameFn, totalUnits, unitType); }); };
+    const processWithCropAndRange = (processFrameFn, totalUnits, unitType) => { let startVal = parseFloat(document.getElementById("startTimeInput").value), endVal = parseFloat(document.getElementById("endTimeInput").value); const effectiveStart = isNaN(startVal) || startVal < 0 ? 0 : startVal; const effectiveEnd = (isNaN(endVal) || endVal <= effectiveStart || endVal > video.duration) ? video.duration : endVal; if (effectiveEnd <= effectiveStart) { alert("End time must be after start time."); finalizeGeneration(true); return; } if (!cropData || cropData.cropWidth <= 0 || cropData.cropHeight <= 0) { console.warn("Invalid crop data before processing, using full frame."); cropData = { cropX: 0, cropY: 0, cropWidth: video.videoWidth || 1, cropHeight: video.videoHeight || 1 }; } processVideoCore(processFrameFn, cropData, effectiveStart, effectiveEnd, totalUnits, unitType); };
+    // Crop detection logic
+    const detectCropBoundaries = (callback) => { if (!video.duration || !isFinite(video.duration) || video.videoWidth === 0 || video.videoHeight === 0) { console.warn("Video not ready or has invalid dimensions for crop detection."); cropData = { cropX: 0, cropY: 0, cropWidth: video.videoWidth || 1, cropHeight: video.videoHeight || 1 }; callback(); return; } const checkTime = Math.min(Math.max(0.1, video.duration / 2), video.duration - 0.1); const doDetect = () => { try { frameCanvas.width = video.videoWidth; frameCanvas.height = video.videoHeight; const ctx = frameCanvas.getContext("2d", { willReadFrequently: true }); ctx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight); const imageData = ctx.getImageData(0, 0, video.videoWidth, video.videoHeight); const data = imageData.data, width = video.videoWidth, height = video.videoHeight; const pixelThreshold = 15, lineRatioThreshold = 0.98; let topCrop = 0, bottomCrop = height - 1, leftCrop = 0, rightCrop = width - 1; for (let y = 0; y < height / 2; y++) { let blackPxCount = 0; for (let x = 0; x < width; x++) { const i = (y * width + x) * 4; if (data[i] < pixelThreshold && data[i+1] < pixelThreshold && data[i+2] < pixelThreshold) blackPxCount++; } if (blackPxCount / width < lineRatioThreshold) { topCrop = y; break; } if (y === Math.floor(height / 2) - 1) topCrop = y; } for (let y = height - 1; y >= height / 2; y--) { let blackPxCount = 0; for (let x = 0; x < width; x++) { const i = (y * width + x) * 4; if (data[i] < pixelThreshold && data[i+1] < pixelThreshold && data[i+2] < pixelThreshold) blackPxCount++; } if (blackPxCount / width < lineRatioThreshold) { bottomCrop = y; break; } if (y === Math.ceil(height / 2)) bottomCrop = y; } for (let x = 0; x < width / 2; x++) { let blackPxCount = 0; for (let y = topCrop; y <= bottomCrop; y++) { const i = (y * width + x) * 4; if (data[i] < pixelThreshold && data[i+1] < pixelThreshold && data[i+2] < pixelThreshold) blackPxCount++; } if (blackPxCount / (bottomCrop - topCrop + 1) < lineRatioThreshold) { leftCrop = x; break; } if (x === Math.floor(width / 2) - 1) leftCrop = x; } for (let x = width - 1; x >= width / 2; x--) { let blackPxCount = 0; for (let y = topCrop; y <= bottomCrop; y++) { const i = (y * width + x) * 4; if (data[i] < pixelThreshold && data[i+1] < pixelThreshold && data[i+2] < pixelThreshold) blackPxCount++; } if (blackPxCount / (bottomCrop - topCrop + 1) < lineRatioThreshold) { rightCrop = x; break; } if (x === Math.ceil(width / 2)) rightCrop = x; } const finalCropWidth = Math.max(1, rightCrop - leftCrop + 1); const finalCropHeight = Math.max(1, bottomCrop - topCrop + 1); cropData = { cropX: leftCrop, cropY: topCrop, cropWidth: finalCropWidth, cropHeight: finalCropHeight }; } catch(e) { console.warn("Crop detection failed:", e, " Using full frame."); cropData = { cropX: 0, cropY: 0, cropWidth: video.videoWidth || 1, cropHeight: video.videoHeight || 1 }; } callback(); }; const seekErrorHandler = e => { console.error("Seek error during crop detection:", e); cropData = { cropX: 0, cropY: 0, cropWidth: video.videoWidth || 1, cropHeight: video.videoHeight || 1 }; callback(); }; video.removeEventListener("seeked", doDetect); video.removeEventListener('error', seekErrorHandler); video.addEventListener("seeked", doDetect, { once: true }); video.addEventListener('error', seekErrorHandler, { once: true }); video.currentTime = checkTime; };
+
+    // --- Event Listeners ---
+    videoInput.addEventListener("change", e => handleFile(e.target.files[0]));
+    dropZone.addEventListener("click", () => videoInput.click());
+    selectFileButton.addEventListener("click", e => { e.stopPropagation(); videoInput.click(); });
+    dropZone.addEventListener("dragover", e => { e.preventDefault(); dropZone.classList.add("hover"); });
+    dropZone.addEventListener("dragleave", e => { e.preventDefault(); dropZone.classList.remove("hover"); });
+    dropZone.addEventListener("drop", e => { e.preventDefault(); dropZone.classList.remove("hover"); handleFile(e.dataTransfer.files[0]); });
+
+    resultCanvas.addEventListener("click", () => { if (finalImageBlobURL) window.open(finalImageBlobURL, "_blank"); });
+    setStartButton.addEventListener("click", () => { if(manualVideo.duration) document.getElementById("startTimeInput").value = Math.floor(manualVideo.currentTime); });
+    setEndButton.addEventListener("click", () => { if(manualVideo.duration) document.getElementById("endTimeInput").value = Math.floor(manualVideo.currentTime); });
+
+    const handleSettingChange = () => { if (isGenerating) return; const checkedPresetRadio = document.querySelector('input[name="sizePreset"]:checked'); if (checkedPresetRadio) selectedPreset = checkedPresetRadio.value; const showCustom = selectedPreset === "Custom"; customSizeInputs.style.display = showCustom ? 'block' : 'none'; const res = getEffectiveResolution(); const isSquareAspect = res.width === res.height; rotateButton.disabled = isSquareAspect; if (isSquareAspect && rotationEnabled) { rotationEnabled = false; rotateButton.classList.remove("active"); } displayCurrentSettingsResult(); };
+
+    rotateButton.addEventListener("click", () => { if (rotateButton.disabled || isGenerating) return; rotationEnabled = !rotationEnabled; rotateButton.classList.toggle("active", rotationEnabled); handleSettingChange(); });
+
+    document.querySelectorAll('input[name="sizePreset"]').forEach(radio => radio.addEventListener("change", handleSettingChange));
+    document.querySelectorAll('input[name="modePreset"]').forEach(radio => radio.addEventListener("change", handleSettingChange));
+    customWidthInput.addEventListener('input', handleSettingChange);
+    customHeightInput.addEventListener('input', handleSettingChange);
+
+    filmGrainButton.addEventListener("click", () => { if (isGenerating) return; filmGrainButton.classList.toggle('active'); if (baseImageData || cleanBaseImageData) { const ctx = resultCanvas.getContext('2d', { alpha: false }); const sourceData = cleanBaseImageData || baseImageData; if (sourceData) { resultCanvas.width = sourceData.width; resultCanvas.height = sourceData.height; ctx.putImageData(sourceData, 0, 0); if (filmGrainButton.classList.contains('active')) { applyFilmGrainOverlay(ctx, resultCanvas.width, resultCanvas.height, 0.15); } resultCanvas.toBlob(blob => { if (finalImageBlobURL) URL.revokeObjectURL(finalImageBlobURL); finalImageBlobURL = blob ? URL.createObjectURL(blob) : null; }, "image/png"); } } });
+
+    // Update checkmarks logic
+    const updateCheckmarks = () => { document.querySelectorAll('.checkmark-indicator i').forEach(icon => icon.className = ''); document.querySelectorAll('.checkmark-indicator').forEach(el => el.classList.remove('visible')); generationCache.forEach((value, key) => { const parts = key.split('_'); let preset = parts[0]; let mode = parts[parts.length - 1]; let isCustom = preset === 'Custom'; const iconClass = value.isComplete ? 'ri-check-fill' : 'ri-progress-2-line'; let formatLabel; if (isCustom) { formatLabel = document.querySelector(`label[for="size-custom"]`); } else { formatLabel = document.querySelector(`label[for="size-${preset.toLowerCase()}"]`); } if (formatLabel) { const indicator = formatLabel.querySelector('.checkmark-indicator'); if(indicator) { indicator.querySelector('i').className = iconClass; indicator.classList.add('visible'); } } const modeLabel = document.querySelector(`label[for="mode-${mode}"]`); if (modeLabel) { const indicator = modeLabel.querySelector('.checkmark-indicator'); if(indicator) { indicator.querySelector('i').className = iconClass; indicator.classList.add('visible'); } } }); };
+
+    // Help Modal Logic
+    function openModal() { document.body.classList.add('modal-open'); }
+    function closeModal() { document.body.classList.remove('modal-open'); }
+    infoButton.addEventListener('click', (e) => { e.stopPropagation(); openModal(); });
+    closeHelpModal.addEventListener('click', closeModal);
+    helpModalOverlay.addEventListener('click', (e) => { if (e.target === helpModalOverlay) { closeModal(); } });
+
+
+    // --- Initial Setup ---
     window.addEventListener("load", () => {
-      if (!video.src) { updatePlaceholderImage(); }
-      const bgCanvas = document.getElementById("bgCanvas");
-      bgCanvas.width = window.innerWidth;
-      bgCanvas.height = window.innerHeight;
-      const bgCtx = bgCanvas.getContext("2d");
-      applyFilmGrainOverlay(bgCtx, bgCanvas.width, bgCanvas.height, 0.05);
+      handleSettingChange();
+      updateCheckmarks();
+      try {
+          const bgCanvas = document.getElementById("bgCanvas"); bgCanvas.width = window.innerWidth; bgCanvas.height = window.innerHeight;
+          applyFilmGrainOverlay(bgCanvas.getContext("2d"), bgCanvas.width, bgCanvas.height, 0.03);
+      } catch(e) {}
     });
-    
-    setStartButton.addEventListener("click", () => {
-      document.getElementById("startTimeInput").value = Math.floor(manualVideo.currentTime);
-    });
-    setEndButton.addEventListener("click", () => {
-      document.getElementById("endTimeInput").value = Math.floor(manualVideo.currentTime);
-    });
+
   </script>
 </body>
 </html>
