@@ -22,18 +22,20 @@
       font-family: 'Karla Tamil Inclined', sans-serif;
       font-weight: 200;
     }
-    /* Remove default bolding for h1 and h2 */
-    h1, h2 {
-      font-weight: normal;
+    /* Ensure h1 and h2 are not bold */
+    h1, h2 { font-weight: normal; }
+    
+    /* Background canvas styling */
+    #bgCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: -100;
     }
-    /* H3 styling mimicking Film Grain text styling – no bottom padding */
-    h3 {
-      font-family: 'Karla Tamil Inclined', sans-serif;
-      font-size: 1rem;
-      color: #ccc;
-      font-weight: normal;
-      margin: 0;
-    }
+    /* Header with h1 */
     .header-container {
       text-align: center;
       margin-bottom: 20px;
@@ -41,10 +43,6 @@
     .title-wrapper {
       display: inline-block;
       transform: rotate(-3deg);
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
     }
     .title-wrapper h1 {
       font-family: 'Licorice', cursive;
@@ -54,7 +52,42 @@
       cursor: pointer;
       user-select: none;
       animation: fadeIn 0.5s ease forwards;
+      font-weight: normal;
     }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    
+    /* Cards container wrapping the main-container and Help button */
+    .cards-container {
+      position: relative;
+      width: 940px;
+      margin: 20px auto;
+    }
+    /* Main container holding the three columns */
+    .main-container {
+      display: flex;
+      justify-content: center;
+      align-items: stretch;
+      gap: 20px;
+    }
+    /* Master Help Button: starts transparent with a stroke; on hover becomes black */
+    #infoButton {
+      position: absolute;
+      top: -40px;
+      right: 0;
+      background-color: rgba(0, 0, 0, 0);
+      border: 1px solid #3a3c40;
+      border-radius: 9999px;
+      color: #ccc;
+      padding: 8px 12px;
+      cursor: pointer;
+      z-index: 1000;
+      transition: background-color 0.3s;
+    }
+    #infoButton:hover {
+      background-color: #000;
+    }
+    
+    /* Column Titles – Upload, Adjust, Generate */
     .column-title {
       font-family: 'Viaoda Libre', cursive;
       font-size: 2rem;
@@ -64,11 +97,31 @@
       margin-bottom: 20px;
       color: #ccc;
       animation: fadeIn 0.5s ease forwards;
+      font-weight: normal;
+      user-select: none;
     }
-    /* Use same h2 style for Upload, left aligned */
-    .column-upload .column-title {
-      text-align: left;
+    
+    h3 {
+      font-family: 'Karla Tamil Inclined', sans-serif;
+      font-size: 1rem;
+      color: #ccc;
+      font-weight: normal;
+      margin: 0;
+      user-select: none;
     }
+    .upload-header, .generation-mode-header { margin-bottom: 5px; }
+    
+    /* Center h3 texts with info icons */
+    .crop-generate h3,
+    .output-size-container h3,
+    .rotation-toggle-container h3,
+    .film-grain-generate h3,
+    .generation-mode-header {
+      display: inline-flex;
+      align-items: center;
+    }
+    
+    /* Gradient text styling for .mood */
     .mood {
       background: linear-gradient(90deg, #ff007a, #ffcf00, #00d4ff);
       background-size: 200%;
@@ -76,63 +129,61 @@
       -webkit-text-fill-color: transparent;
       transition: background-position 1s ease;
     }
-    .title-wrapper h1:hover .mood {
-      background-position: 100%;
+    #moodButton span.mood {
+      background: linear-gradient(90deg, #ff007a, #ffcf00, #00d4ff);
+      background-size: 200%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      transition: background-position 1s ease;
     }
+    #moodButton:hover span.mood { background-position: 100%; }
+    .title-wrapper h1:hover .mood { background-position: 100%; }
+    
     @keyframes previewGlow {
       0% { box-shadow: 0 0 0px rgba(255,255,255,0); }
-      50% { box-shadow: 0 0 20px rgba(255,255,255,1); }
+      50% { box-shadow: 0 0 20px rgba(255,255,255,0.3); }
       100% { box-shadow: 0 0 0px rgba(255,255,255,0); }
     }
-    input, button, select {
-      font-family: 'Karla Tamil Inclined', sans-serif;
-    }
+    
+    input, button, select { font-family: 'Karla Tamil Inclined', sans-serif; }
     .divider90 {
       width: 90%;
       border: none;
       border-top: 1px solid rgba(58,60,64,0.5);
       margin: 1em auto;
     }
-    /* Output Size Section */
-    .output-size-container {
-      margin-bottom: 10px;
-    }
-    /* Segmented-control as a 2x2 grid with 1em top/bottom padding */
+    .output-size-container { margin-bottom: 10px; padding-bottom: 0; }
+    .output-size-container h3 { margin-bottom: 0; }
+    
     .segmented-control {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
       gap: 5px;
       padding: 1em 0;
-      margin-bottom: 8px;
+      margin-bottom: 0;
     }
-    .segmented-control input[type="radio"] {
-      display: none;
+    .segmented-control.mode-control {
+      margin: 1em 0;
+      padding: 0;
     }
+    .segmented-control input[type="radio"] { display: none; }
     .segmented-control label {
       padding: 8px 12px;
       background-color: #151515;
       border: 1px solid #3a3c40;
       border-radius: 4px;
       cursor: pointer;
-      transition: background-color 0.3s, color 0.3s;
+      transition: filter 0.3s;
       font-size: 0.9rem;
       color: #ccc;
       text-align: center;
     }
+    .segmented-control label:hover { filter: brightness(95%); }
     .segmented-control input[type="radio"]:checked + label {
       background-color: #6447ff;
       color: #000;
     }
-    /* Rotate container: align h3 text to bottom left, toggle to right */
-    .rotation-toggle-container {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-end;
-      font-size: 0.9rem;
-      color: #ccc;
-    }
-    /* Film Grain container: same as Rotate container */
-    .film-grain-generate {
+    .rotation-toggle-container, .film-grain-generate {
       display: flex;
       justify-content: space-between;
       align-items: flex-end;
@@ -146,17 +197,10 @@
       height: 24px;
       cursor: pointer;
     }
-    .toggle-switch input {
-      opacity: 0;
-      width: 0;
-      height: 0;
-    }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
     .slider {
       position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
+      top: 0; left: 0; right: 0; bottom: 0;
       background-color: #555;
       transition: .4s;
       border-radius: 24px;
@@ -178,7 +222,6 @@
     .toggle-switch input:checked + .slider:before {
       transform: translateX(26px);
     }
-    /* Force all cards to have equal height */
     .column-box {
       background-color: #151515;
       border: 1px solid #3a3c40;
@@ -189,26 +232,12 @@
       flex-direction: column;
       height: 100%;
     }
-    .main-container {
-      display: flex;
-      justify-content: center;
-      align-items: stretch;
-      gap: 20px;
-      max-width: 1200px;
-      margin: 0 auto 20px;
-    }
-    .column-upload,
-    .column-manual,
-    .column-generate {
+    .column-upload, .column-manual, .column-generate {
       width: 300px;
       display: flex;
       flex-direction: column;
     }
-    /* Upload Column */
-    .column-upload .column-box {
-      text-align: left;
-    }
-    /* Upload: center the filename */
+    .column-upload .column-box { text-align: left; }
     #dropZoneText {
       font-size: 1rem;
       margin-bottom: 1em;
@@ -216,10 +245,12 @@
       overflow-wrap: break-word;
       text-align: center;
     }
+    .upload-header { margin-bottom: 0; }
     #dropZone {
       width: 100%;
-      height: 260px;
+      height: auto;
       padding: 20px;
+      margin: 1em 0;
       border: 1px solid #3a3c40;
       border-radius: 20px;
       background-color: #0a0a0a;
@@ -231,15 +262,8 @@
       transition: background-color 0.2s, border-color 0.2s;
       box-sizing: border-box;
     }
-    #dropZone:hover {
-      background-color: #0b0b0b;
-      border-color: #5a5a5a;
-    }
-    #uploadIcon svg {
-      width: 48px;
-      height: 48px;
-      fill: #f1f1f1;
-    }
+    #dropZone:hover { background-color: #0b0b0b; border-color: #5a5a5a; }
+    #uploadIcon svg { width: 48px; height: 48px; fill: #f1f1f1; }
     #selectFileButton {
       padding: 8px 16px;
       font-size: 1rem;
@@ -250,16 +274,12 @@
       cursor: pointer;
       transition: background-color 0.2s, border 0.2s;
     }
-    #dropZone:hover #selectFileButton {
-      background-color: #474747;
-    }
+    #dropZone:hover #selectFileButton { background-color: #474747; }
     #selectFileButton.file-selected {
       background-color: transparent;
       border: 1px solid rgba(255,255,255,0.8);
     }
-    #selectFileButton.file-selected:hover {
-      border-color: rgba(255,255,255,1);
-    }
+    #selectFileButton.file-selected:hover { border-color: rgba(255,255,255,1); }
     #loadingBarContainer {
       width: 100%;
       height: 10px;
@@ -275,23 +295,10 @@
       border-radius: 5px;
       transition: width 0.3s;
     }
-    /* Adjust Column */
-    .toggle-container, .range-container {
-      margin: 0;
-    }
-    .toggle-container label {
-      font-size: 1rem;
-      color: #ccc;
-    }
-    .toggle-container {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    /* Remove padding from .number-inputs */
-    .number-inputs {
-      padding: 0;
-    }
+    .toggle-container, .range-container { margin: 0; }
+    .toggle-container label { font-size: 1rem; color: #ccc; }
+    .toggle-container { display: flex; justify-content: space-between; align-items: center; }
+    .number-inputs { padding: 0; }
     .range-wrapper {
       display: flex;
       align-items: center;
@@ -305,8 +312,9 @@
       background-color: #1a1a1a;
       color: #f1f1f1;
       box-sizing: border-box;
+      text-align: center;
     }
-    /* Adjust video player's margin: 1em top and bottom */
+    .range-wrapper input[type="number"]:focus { outline: none; box-shadow: none; }
     .column-manual video {
       width: 100%;
       border: 2px solid #3a3c40;
@@ -315,11 +323,7 @@
       margin-top: 1em;
       margin-bottom: 1em;
     }
-    .manual-buttons {
-      display: flex;
-      gap: 0;
-    }
-    /* Style Set Start and Set End buttons like segmented-control buttons */
+    .manual-buttons { display: flex; gap: 0; }
     .manual-buttons button {
       flex: 1;
       padding: 8px 12px;
@@ -329,12 +333,9 @@
       border-radius: 4px;
       color: #ccc;
       cursor: pointer;
-      transition: background-color 0.3s, color 0.3s;
+      transition: filter 0.3s;
     }
-    .manual-buttons button:hover {
-      background-color: #6447ff;
-      color: #000;
-    }
+    .manual-buttons button:hover { filter: brightness(95%); }
     .crop-generate {
       display: flex;
       justify-content: space-between;
@@ -343,24 +344,13 @@
       margin: 0;
       padding: 0;
     }
-    .crop-generate h3 {
-      margin: 0;
-    }
-    /* Dropdown & Mood Button */
-    .dropdown-container-bottom {
-      width: 100%;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-    .dropdown-container-bottom select {
-      width: 100%;
-      padding: 8px;
-      font-size: 1rem;
-      background-color: #151515;
-      border: 1px solid #3a3c40;
-      border-radius: 4px;
-      color: #f1f1f1;
+    .crop-generate h3 { margin: 0; }
+    .generation-mode-header { margin-bottom: 0; }
+    .segmented-control.mode-control {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 5px;
+      margin: 1em 0;
+      padding: 0;
     }
     .column-generate button {
       width: 100%;
@@ -368,16 +358,37 @@
       font-size: 1rem;
       border: none;
       border-radius: 9999px;
+      margin-top: 0;
+    }
+    /* Mood/Cancel Button styles */
+    #moodButton {
+      position: relative;
+      background-color: #000;
+      color: white;
+      padding: 12px 24px;
+      font-size: 1rem;
+      border: none;
+      border-radius: 9999px;
+      cursor: pointer;
+      z-index: 1;
+      overflow: hidden;
+      transition: background-color 0.3s;
+    }
+    #moodButton::before {
+      content: "";
+      position: absolute;
+      top: -4px;
+      left: -4px;
+      right: -4px;
+      bottom: -4px;
       background: linear-gradient(90deg, #ff007a, #ffcf00, #00d4ff);
       background-size: 200%;
-      color: #000;
-      cursor: pointer;
+      z-index: -1;
+      border-radius: inherit;
       transition: background-position 1s ease;
     }
-    #moodButton:hover {
-      background-position: 100%;
-    }
-    /* Result Canvas */
+    #moodButton:hover::before { background-position: 100%; }
+    .cancel-mode::before { display: none; }
     #resultCanvas {
       display: block;
       margin: 20px auto;
@@ -396,108 +407,160 @@
       margin-top: 10px;
       font-size: 1rem;
       display: none;
+      user-select: none;
+    }
+    
+    /* Updated Info Icon styling with smaller circle and 1em left margin */
+    .info-icon {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      line-height: 16px;
+      text-align: center;
+      border-radius: 50%;
+      background-color: #151515;
+      border: 1px solid #3a3c40;
+      color: #3a3c40;
+      font-size: 10px;
+      font-weight: normal;
+      margin-left: 1em;
+      cursor: pointer;
+      position: relative;
+      vertical-align: middle;
+      transition: background-color 0.3s;
+    }
+    .info-icon:hover {
+      background-color: #000;
+    }
+    .info-icon::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      bottom: 125%;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: rgba(0, 0, 0, 0.75);
+      color: #fff;
+      padding: 5px 8px;
+      border-radius: 4px;
+      white-space: nowrap;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s;
+      z-index: 1000;
+    }
+    .info-icon:hover::after {
+      opacity: 1;
+      visibility: visible;
     }
   </style>
 </head>
 <body>
-  <!-- Header -->
+  <!-- Background Canvas for Film Grain on website (more subtle) -->
+  <canvas id="bgCanvas"></canvas>
+  
+  <!-- Header with h1 -->
   <div class="header-container">
     <div class="title-wrapper">
       <h1 onclick="window.location.reload()">Video <span class="mood">Mood</span> Visualizer</h1>
     </div>
   </div>
   
-  <!-- Main Container -->
-  <div class="main-container">
-    <!-- Upload Column -->
-    <div class="column-upload">
-      <div class="column-box">
-        <h2 class="column-title">Upload</h2>
-        <div id="dropZone">
-          <div id="uploadIcon">
-            <svg viewBox="0 0 24 24">
-              <path d="M12 2l5.5 9h-4v9h-3v-9h-4l5.5-9z"/>
-            </svg>
+  <!-- Cards Container wrapping main-container and Help button -->
+  <div class="cards-container">
+    <!-- Master Help Button (renamed from Info) positioned above the cards -->
+    <button id="infoButton">Help</button>
+    
+    <!-- Main Container with cards -->
+    <div class="main-container">
+      <!-- Upload Column -->
+      <div class="column-upload">
+        <div class="column-box">
+          <h2 class="column-title">Upload</h2>
+          <h3 class="upload-header">File</h3>
+          <div id="dropZone">
+            <div id="uploadIcon">
+              <svg viewBox="0 0 24 24">
+                <path d="M12 2l5.5 9h-4v9h-3v-9h-4l5.5-9z"/>
+              </svg>
+            </div>
+            <div id="dropZoneText">Drag and drop a video file to upload</div>
+            <button id="selectFileButton" type="button">Select file</button>
+            <input type="file" id="videoInput" accept="video/*" style="display: none;">
           </div>
-          <div id="dropZoneText">Drag and drop a video file to upload</div>
-          <button id="selectFileButton" type="button">Select file</button>
-          <input type="file" id="videoInput" accept="video/*" style="display: none;">
-        </div>
-        <div id="loadingBarContainer">
-          <div id="loadingBar"></div>
+          <div id="loadingBarContainer">
+            <div id="loadingBar"></div>
+          </div>
         </div>
       </div>
-    </div>
-    
-    <!-- Adjust Column -->
-    <div class="column-manual">
-      <div class="column-box">
-        <h2 class="column-title">Adjust</h2>
-        <div class="crop-generate">
-          <h3>Crop Video</h3>
-        </div>
-        <video id="manualVideo" controls style="border-radius: 6px;"></video>
-        <div class="range-container extra">
-          <div class="number-inputs">
-            <div class="range-wrapper">
-              <input type="number" id="startTimeInput" placeholder="Start" value="0">
-              <input type="number" id="endTimeInput" placeholder="End">
+      
+      <!-- Adjust Column -->
+      <div class="column-manual">
+        <div class="column-box">
+          <h2 class="column-title" title="Optional. Gives finer control to your output">Adjust</h2>
+          <div class="crop-generate">
+            <h3>Crop Video <span class="info-icon" data-tooltip="Useful for cropping end credits">?</span></h3>
+          </div>
+          <video id="manualVideo" controls style="border-radius: 6px;"></video>
+          <div class="range-container extra">
+            <div class="number-inputs">
+              <div class="range-wrapper">
+                <input type="number" id="startTimeInput" placeholder="Start" value="0">
+                <input type="number" id="endTimeInput" placeholder="End">
+              </div>
             </div>
           </div>
-        </div>
-        <div class="manual-buttons extra">
-          <button id="setStartButton">Set Start</button>
-          <button id="setEndButton">Set End</button>
+          <div class="manual-buttons extra">
+            <button id="setStartButton">Set Start</button>
+            <button id="setEndButton">Set End</button>
+          </div>
         </div>
       </div>
-    </div>
-    
-    <!-- Generate Column -->
-    <div class="column-generate">
-      <div class="column-box">
-        <h2 class="column-title">Generate</h2>
-        <!-- Output Size Section -->
-        <div class="output-size-container">
-          <h3>Output Size</h3>
-          <div class="segmented-control" id="sizeControl">
-            <input type="radio" name="sizePreset" id="size-desktop" value="Desktop" checked>
-            <label for="size-desktop">Desktop</label>
-            <input type="radio" name="sizePreset" id="size-phone" value="Phone">
-            <label for="size-phone">Phone</label>
-            <input type="radio" name="sizePreset" id="size-poster" value="Poster">
-            <label for="size-poster">Poster</label>
-            <input type="radio" name="sizePreset" id="size-square" value="Square">
-            <label for="size-square">Square</label>
+      
+      <!-- Generate Column -->
+      <div class="column-generate">
+        <div class="column-box">
+          <h2 class="column-title" title="Samples and processes frame colors locally in your browser">Generate</h2>
+          <div class="output-size-container">
+            <h3>Format <span class="info-icon" data-tooltip="Desktop (3200×1800) - Phone (1500×3000) - Poster (3000×4500) - Square (2000×2000)">?</span></h3>
+            <div class="segmented-control" id="sizeControl">
+              <input type="radio" name="sizePreset" id="size-desktop" value="Desktop" checked>
+              <label for="size-desktop">Desktop</label>
+              <input type="radio" name="sizePreset" id="size-phone" value="Phone">
+              <label for="size-phone">Phone</label>
+              <input type="radio" name="sizePreset" id="size-poster" value="Poster">
+              <label for="size-poster">Poster</label>
+              <input type="radio" name="sizePreset" id="size-square" value="Square">
+              <label for="size-square">Square</label>
+            </div>
+            <div class="rotation-toggle-container" id="rotationContainer">
+              <h3>Rotate <span class="info-icon" data-tooltip="Rotates your selected format canvas by 90°">?</span></h3>
+              <label class="toggle-switch">
+                <input type="checkbox" id="rotationToggle">
+                <span class="slider"></span>
+              </label>
+            </div>
           </div>
-          <div class="rotation-toggle-container" id="rotationContainer">
-            <h3>Rotate</h3>
+          <hr class="divider90">
+          <div class="film-grain-generate">
+            <h3>Film Grain <span class="info-icon" data-tooltip="After your image is generated, you can toggle film grain effect to it">?</span></h3>
             <label class="toggle-switch">
-              <input type="checkbox" id="rotationToggle">
+              <input type="checkbox" id="filmGrainToggle">
               <span class="slider"></span>
             </label>
           </div>
-        </div>
-        <hr class="divider90">
-        <div class="film-grain-generate">
-          <h3>Film Grain</h3>
-          <label class="toggle-switch">
-            <input type="checkbox" id="filmGrainToggle">
-            <span class="slider"></span>
-          </label>
-        </div>
-        <hr class="divider90">
-        <!-- Mode Dropdown & Mood Button -->
-        <div class="dropdown-container-bottom">
-          <select id="modeSelect">
-            <option value="color">Color</option>
-            <option value="stretch">Stretch</option>
-            <option value="smooth">Smooth</option>
-            <option value="rowSample">Row Sample</option>
-            <option value="multiBand">MultiBand</option>
-            <option value="gaussian">Gaussian</option>
-            <option value="median">Median</option>
-          </select>
-          <button id="moodButton">Mood</button>
+          <hr class="divider90">
+          <h3 class="generation-mode-header">Mode <span class="info-icon" data-tooltip="Color (average color) - Stretch (stretched frames) - Gradient (blurred stretched frames) - Pixel (average color in rows of cells)">?</span></h3>
+          <div class="segmented-control mode-control" id="modeControl">
+            <input type="radio" name="modePreset" id="mode-color" value="color" checked>
+            <label for="mode-color">Color</label>
+            <input type="radio" name="modePreset" id="mode-stretch" value="stretch">
+            <label for="mode-stretch">Stretch</label>
+            <input type="radio" name="modePreset" id="mode-gradient" value="gradient">
+            <label for="mode-gradient">Gradient</label>
+            <input type="radio" name="modePreset" id="mode-pixel" value="pixel">
+            <label for="mode-pixel">Pixel</label>
+          </div>
+          <button id="moodButton">Create Mood</button>
         </div>
       </div>
     </div>
@@ -505,30 +568,42 @@
   
   <!-- Preview Canvas -->
   <canvas id="resultCanvas"></canvas>
-  <!-- Time Remaining -->
-  <div id="timeElapsed"></div>
+  <!-- Time Elapsed / Remaining -->
+  <div id="timeElapsed" style="user-select: none;" title="Each sample involves seeking, decoding, and averaging video frame pixels—operations that are CPU/GPU intensive. In 'Pixel' mode, total samples equal the number of grid cells (cell size fixed at 100 pixels)."></div>
   
   <!-- Hidden Elements for Processing -->
   <video id="video" style="display: none;"></video>
   <canvas id="frameCanvas" style="display: none;"></canvas>
   
   <script>
-    // Global Variables
+    // Master Help button logic
+    const infoButton = document.getElementById("infoButton");
+    infoButton.addEventListener("click", (e) => {
+      e.stopPropagation();
+      document.body.classList.toggle("info-mode");
+    });
+    document.addEventListener("click", () => {
+      if(document.body.classList.contains("info-mode")){
+        document.body.classList.remove("info-mode");
+      }
+    });
+    
+    // Global variables for generation and cancellation
     let generationStartTime = null;
     let elapsedInterval = null;
     let currentSliceGlobal = 0;
+    let generationComplete = false;
+    let isGenerating = false;
+    let cancelRequested = false;
     let baseImageData = null;
+    let cleanBaseImageData = null;
     let cropData = null;
     let finalImageBlobURL = null;
     let loadingInterval = null;
+    let smoothingEnabledGlobal = true;
     
-    // Updated Presets:
-    // Desktop: 2560x1440
-    // Phone: 1500x3000
-    // Poster: 3000x4500
-    // Square: 2000x2000
     const resolutionPresets = {
-      "Desktop": { width: 2560, height: 1440 },
+      "Desktop": { width: 3200, height: 1800 },
       "Phone": { width: 1500, height: 3000 },
       "Poster": { width: 3000, height: 4500 },
       "Square": { width: 2000, height: 2000 }
@@ -544,13 +619,21 @@
     }
     
     function updateElapsedTime() {
-      if (!generationStartTime) return;
+      if (generationComplete || !generationStartTime) return;
       const elapsed = (Date.now() - generationStartTime) / 1000;
-      const timeEl = document.getElementById("timeElapsed");
       const res = getEffectiveResolution();
-      const totalSlices = res.width;
+      let totalSamples;
+      if (getSelectedMode() === "pixel") {
+        const cellSize = 100;
+        const cols = Math.ceil(res.width / cellSize);
+        const rows = Math.ceil(res.height / cellSize);
+        totalSamples = cols * rows;
+      } else {
+        totalSamples = res.width;
+      }
+      const timeEl = document.getElementById("timeElapsed");
       if (currentSliceGlobal > 0) {
-        const estimatedTotal = elapsed * totalSlices / currentSliceGlobal;
+        const estimatedTotal = elapsed * totalSamples / currentSliceGlobal;
         const remaining = Math.max(0, estimatedTotal - elapsed);
         timeEl.textContent = "Time remaining: " + Math.round(remaining) + " seconds";
       } else {
@@ -558,6 +641,7 @@
       }
     }
     function startElapsedTimer() {
+      generationComplete = false;
       generationStartTime = Date.now();
       document.getElementById("timeElapsed").style.display = "block";
       elapsedInterval = setInterval(updateElapsedTime, 1000);
@@ -565,11 +649,9 @@
     function stopElapsedTimer() {
       clearInterval(elapsedInterval);
       elapsedInterval = null;
-      generationStartTime = null;
-      updateElapsedTime();
+      generationComplete = true;
     }
     
-    // File & Drag/Drop Handling
     const videoInput = document.getElementById("videoInput");
     const video = document.getElementById("video");
     const manualVideo = document.getElementById("manualVideo");
@@ -592,9 +674,14 @@
         dropZoneText.style.marginBottom = "1em";
         selectFileButton.textContent = "File selected";
         dropZone.style.backgroundColor = "#151515";
-        document.getElementById("uploadIcon").innerHTML = `<svg viewBox="0 0 24 24"><path d="M9 16.2l-3.5-3.5L4 14.2l5 5 12-12-1.4-1.4z"/></svg>`;
+        document.getElementById("uploadIcon").innerHTML =
+          `<svg viewBox="0 0 24 24"><path d="M9 16.2l-3.5-3.5L4 14.2l5 5 12-12-1.4-1.4z"/></svg>`;
         startLoadingBar();
-        video.addEventListener("loadedmetadata", () => { stopLoadingBar(); }, { once: true });
+        video.addEventListener("loadedmetadata", () => {
+          stopLoadingBar();
+          // Set the "End" input to the video's duration (last frame)
+          document.getElementById("endTimeInput").value = Math.floor(video.duration);
+        }, { once: true });
       }
     });
     dropZone.addEventListener("click", () => videoInput.click());
@@ -621,9 +708,14 @@
         dropZoneText.style.marginBottom = "1em";
         selectFileButton.textContent = "File selected";
         dropZone.style.backgroundColor = "#151515";
-        document.getElementById("uploadIcon").innerHTML = `<svg viewBox="0 0 24 24"><path d="M9 16.2l-3.5-3.5L4 14.2l5 5 12-12-1.4-1.4z"/></svg>`;
+        document.getElementById("uploadIcon").innerHTML =
+          `<svg viewBox="0 0 24 24"><path d="M9 16.2l-3.5-3.5L4 14.2l5 5 12-12-1.4-1.4z"/></svg>`;
         startLoadingBar();
-        video.addEventListener("loadedmetadata", () => { stopLoadingBar(); }, { once: true });
+        video.addEventListener("loadedmetadata", () => {
+          stopLoadingBar();
+          // Set the "End" input to the video's duration
+          document.getElementById("endTimeInput").value = Math.floor(video.duration);
+        }, { once: true });
       }
     });
     function startLoadingBar() {
@@ -651,8 +743,7 @@
       if (finalImageBlobURL) window.open(finalImageBlobURL, "_blank");
     });
     
-    // Film Grain Overlay – generate noise at full resolution for fine grain
-    function applyFilmGrainOverlay(ctx, width, height) {
+    function applyFilmGrainOverlay(ctx, width, height, alpha = 0.3) {
       const noiseCanvas = document.createElement("canvas");
       noiseCanvas.width = width;
       noiseCanvas.height = height;
@@ -669,7 +760,7 @@
       noiseCtx.putImageData(noiseImageData, 0, 0);
       ctx.save();
       ctx.globalCompositeOperation = "overlay";
-      ctx.globalAlpha = 0.3;
+      ctx.globalAlpha = alpha;
       ctx.drawImage(noiseCanvas, 0, 0, width, height);
       ctx.restore();
     }
@@ -688,7 +779,7 @@
         let blackCount = 0;
         for (let x = 0; x < width; x++) {
           const idx = (y * width + x) * 4;
-          const lum = 0.2126 * data[idx] + 0.7152 * data[idx + 1] + 0.0722 * data[idx + 2];
+          const lum = 0.2126 * data[idx] + 0.7152 * data[idx+1] + 0.0722 * data[idx+2];
           if (lum < pixelThreshold) blackCount++;
         }
         if ((blackCount / width) < blackRatio) { topCrop = y; break; }
@@ -697,7 +788,7 @@
         let blackCount = 0;
         for (let x = 0; x < width; x++) {
           const idx = (y * width + x) * 4;
-          const lum = 0.2126 * data[idx] + 0.7152 * data[idx + 1] + 0.0722 * data[idx + 2];
+          const lum = 0.2126 * data[idx] + 0.7152 * data[idx+1] + 0.0722 * data[idx+2];
           if (lum < pixelThreshold) blackCount++;
         }
         if ((blackCount / width) < blackRatio) { bottomCrop = y; break; }
@@ -710,7 +801,6 @@
       return tempCanvas;
     }
     
-    // Update Placeholder Image using effective resolution
     function updatePlaceholderImage() {
       const res = getEffectiveResolution();
       resultCanvas.width = res.width;
@@ -722,7 +812,6 @@
       applyPostGenerationEffects();
     }
     
-    // Re-render generated image from baseImageData (without film grain applied here)
     function applyPostGenerationEffects() {
       const ctx = resultCanvas.getContext("2d");
       ctx.putImageData(baseImageData, 0, 0);
@@ -734,14 +823,18 @@
       }, "image/png");
     }
     
-    // Final Image Generation – crop then apply film grain overlay if enabled
     function updateFinalImageBlobURL() {
       stopElapsedTimer();
       const ctx = resultCanvas.getContext("2d");
-      const croppedCanvas = removeBlackBarsFromImage(resultCanvas);
-      if (croppedCanvas.height < 0.9 * resultCanvas.height) {
-        ctx.clearRect(0, 0, resultCanvas.width, resultCanvas.height);
-        ctx.drawImage(croppedCanvas, 0, 0, resultCanvas.width, resultCanvas.height);
+      if (cleanBaseImageData) {
+        ctx.putImageData(cleanBaseImageData, 0, 0);
+      } else {
+        const croppedCanvas = removeBlackBarsFromImage(resultCanvas);
+        if (croppedCanvas.height < 0.9 * resultCanvas.height) {
+          ctx.clearRect(0, 0, resultCanvas.width, resultCanvas.height);
+          ctx.drawImage(croppedCanvas, 0, 0, resultCanvas.width, resultCanvas.height);
+        }
+        cleanBaseImageData = ctx.getImageData(0, 0, resultCanvas.width, resultCanvas.height);
       }
       if (filmGrainToggle.checked) {
         applyFilmGrainOverlay(ctx, resultCanvas.width, resultCanvas.height);
@@ -755,13 +848,24 @@
           setTimeout(() => { resultCanvas.style.animation = ""; }, 2000);
         }
       }, "image/png");
+      // Reset button text to "Create Mood"
+      moodButton.textContent = "Create Mood";
+      moodButton.classList.remove("cancel-mode");
+      isGenerating = false;
+      cancelRequested = false;
     }
     
-    // Processing Functions – using effective resolution for all modes
+    function shouldCancel() {
+      if (cancelRequested) {
+        updateFinalImageBlobURL();
+        return true;
+      }
+      return false;
+    }
     
-    // Color Mode
     function processVideo16x9(crop, effectiveStart, effectiveEnd) {
       finalImageBlobURL = null;
+      cleanBaseImageData = null;
       currentSliceGlobal = 0;
       const res = getEffectiveResolution();
       resultCanvas.width = res.width;
@@ -773,9 +877,11 @@
         frameCanvas.height = video.videoHeight;
       }
       const frameCtx = frameCanvas.getContext("2d");
+      frameCtx.imageSmoothingEnabled = smoothingEnabledGlobal;
       let currentSlice = 0;
       startElapsedTimer();
       function processSlice() {
+        if (shouldCancel()) return;
         if (currentSlice >= totalSlices) {
           updateFinalImageBlobURL();
           return;
@@ -784,6 +890,8 @@
         let targetTime = effectiveStart + (currentSlice / totalSlices) * (effectiveEnd - effectiveStart) + 0.0001;
         video.currentTime = targetTime;
         video.addEventListener("seeked", function onSeeked() {
+          if (shouldCancel()) return;
+          frameCtx.imageSmoothingEnabled = smoothingEnabledGlobal;
           if (crop) {
             frameCtx.drawImage(video, crop.cropX, crop.cropY, crop.cropWidth, crop.cropHeight, 0, 0, crop.cropWidth, crop.cropHeight);
           } else {
@@ -800,8 +908,14 @@
           r = Math.floor(r / count);
           g = Math.floor(g / count);
           b = Math.floor(b / count);
-          resultCtx.fillStyle = `rgb(${r}, ${g}, ${b})`;
-          resultCtx.fillRect(currentSlice, 0, 1, res.height);
+          let tempCanvas = document.createElement("canvas");
+          tempCanvas.width = 1;
+          tempCanvas.height = 1;
+          let tempCtx = tempCanvas.getContext("2d");
+          tempCtx.fillStyle = `rgb(${r}, ${g}, ${b})`;
+          tempCtx.fillRect(0, 0, 1, 1);
+          resultCtx.imageSmoothingEnabled = false;
+          resultCtx.drawImage(tempCanvas, 0, 0, 1, 1, currentSlice, 0, 1, res.height);
           currentSlice++;
           video.removeEventListener("seeked", onSeeked);
           processSlice();
@@ -810,42 +924,9 @@
       processSlice();
     }
     
-    // Stretch Mode
-    function processVideoStretched16x9(crop, effectiveStart, effectiveEnd) {
-      finalImageBlobURL = null;
-      currentSliceGlobal = 0;
-      const res = getEffectiveResolution();
-      resultCanvas.width = res.width;
-      resultCanvas.height = res.height;
-      const totalSlices = res.width;
-      const resultCtx = resultCanvas.getContext("2d");
-      let currentSlice = 0;
-      startElapsedTimer();
-      function processSlice() {
-        if (currentSlice >= totalSlices) {
-          updateFinalImageBlobURL();
-          return;
-        }
-        currentSliceGlobal = currentSlice;
-        let targetTime = effectiveStart + (currentSlice / totalSlices) * (effectiveEnd - effectiveStart) + 0.0001;
-        video.currentTime = targetTime;
-        video.addEventListener("seeked", function onSeeked() {
-          if (crop) {
-            resultCtx.drawImage(video, crop.cropX, crop.cropY, crop.cropWidth, crop.cropHeight, currentSlice, 0, 1, res.height);
-          } else {
-            resultCtx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight, currentSlice, 0, 1, res.height);
-          }
-          currentSlice++;
-          video.removeEventListener("seeked", onSeeked);
-          processSlice();
-        }, { once: true });
-      }
-      processSlice();
-    }
-    
-    // Smooth/Experimental Mode
     function processVideoExperimental(crop, effectiveStart, effectiveEnd) {
       finalImageBlobURL = null;
+      cleanBaseImageData = null;
       currentSliceGlobal = 0;
       const res = getEffectiveResolution();
       resultCanvas.width = res.width;
@@ -857,15 +938,18 @@
         frameCanvas.height = video.videoHeight;
       }
       const frameCtx = frameCanvas.getContext("2d");
+      frameCtx.imageSmoothingEnabled = smoothingEnabledGlobal;
+      if (smoothingEnabledGlobal) frameCtx.imageSmoothingQuality = "high";
       const tempCanvas = document.createElement("canvas");
       tempCanvas.width = 1;
       tempCanvas.height = res.height;
       const tempCtx = tempCanvas.getContext("2d");
-      tempCtx.imageSmoothingEnabled = true;
-      tempCtx.imageSmoothingQuality = "high";
+      tempCtx.imageSmoothingEnabled = smoothingEnabledGlobal;
+      if (smoothingEnabledGlobal) tempCtx.imageSmoothingQuality = "high";
       let currentSlice = 0;
       startElapsedTimer();
       function processSlice() {
+        if (shouldCancel()) return;
         if (currentSlice >= totalSlices) {
           updateFinalImageBlobURL();
           return;
@@ -874,6 +958,9 @@
         let targetTime = effectiveStart + (currentSlice / totalSlices) * (effectiveEnd - effectiveStart) + 0.0001;
         video.currentTime = targetTime;
         video.addEventListener("seeked", function onSeeked() {
+          if (shouldCancel()) return;
+          frameCtx.imageSmoothingEnabled = smoothingEnabledGlobal;
+          if (smoothingEnabledGlobal) frameCtx.imageSmoothingQuality = "high";
           if (crop) {
             frameCtx.drawImage(video, crop.cropX, crop.cropY, crop.cropWidth, crop.cropHeight, 0, 0, crop.cropWidth, crop.cropHeight);
           } else {
@@ -890,156 +977,9 @@
       processSlice();
     }
     
-    // Row Sample Mode
-    function processVideoRowSample(crop, effectiveStart, effectiveEnd) {
-      finalImageBlobURL = null;
-      currentSliceGlobal = 0;
-      const res = getEffectiveResolution();
-      resultCanvas.width = res.width;
-      resultCanvas.height = res.height;
-      const totalSlices = res.width;
-      const resultCtx = resultCanvas.getContext("2d");
-      let fixedRow = Math.floor(video.videoHeight / 2);
-      let currentSlice = 0;
-      startElapsedTimer();
-      function processSlice() {
-        if (currentSlice >= totalSlices) {
-          updateFinalImageBlobURL();
-          return;
-        }
-        currentSliceGlobal = currentSlice;
-        let targetTime = effectiveStart + (currentSlice / totalSlices) * (effectiveEnd - effectiveStart) + 0.0001;
-        video.currentTime = targetTime;
-        video.addEventListener("seeked", function onSeeked() {
-          let rowCanvas = document.createElement("canvas");
-          rowCanvas.width = video.videoWidth;
-          rowCanvas.height = 1;
-          let rowCtx = rowCanvas.getContext("2d");
-          rowCtx.drawImage(video, 0, fixedRow, video.videoWidth, 1, 0, 0, video.videoWidth, 1);
-          let rotatedCanvas = document.createElement("canvas");
-          rotatedCanvas.width = 1;
-          rotatedCanvas.height = res.height;
-          let rotatedCtx = rotatedCanvas.getContext("2d");
-          rotatedCtx.save();
-          rotatedCtx.translate(0, res.height);
-          rotatedCtx.rotate(-Math.PI/2);
-          rotatedCtx.drawImage(rowCanvas, 0, 0, rowCanvas.width, 1, 0, 0, res.height, 1);
-          rotatedCtx.restore();
-          resultCtx.drawImage(rotatedCanvas, 0, 0, 1, res.height, currentSlice, 0, 1, res.height);
-          currentSlice++;
-          video.removeEventListener("seeked", onSeeked);
-          processSlice();
-        }, { once: true });
-      }
-      processSlice();
-    }
-    
-    // MultiBand Mode
-    function processVideoMultiBand(crop, effectiveStart, effectiveEnd) {
-      finalImageBlobURL = null;
-      currentSliceGlobal = 0;
-      const res = getEffectiveResolution();
-      resultCanvas.width = res.width;
-      resultCanvas.height = res.height;
-      const totalSlices = res.width;
-      const resultCtx = resultCanvas.getContext("2d");
-      let currentSlice = 0;
-      startElapsedTimer();
-      function processSlice() {
-        if (currentSlice >= totalSlices) {
-          updateFinalImageBlobURL();
-          return;
-        }
-        currentSliceGlobal = currentSlice;
-        let targetTime = effectiveStart + (currentSlice / totalSlices) * (effectiveEnd - effectiveStart) + 0.0001;
-        video.currentTime = targetTime;
-        video.addEventListener("seeked", function onSeeked() {
-          if (crop) {
-            frameCanvas.width = crop.cropWidth;
-            frameCanvas.height = crop.cropHeight;
-            frameCanvas.getContext("2d").drawImage(video, crop.cropX, crop.cropY, crop.cropWidth, crop.cropHeight, 0, 0, crop.cropWidth, crop.cropHeight);
-          } else {
-            frameCanvas.width = video.videoWidth;
-            frameCanvas.height = video.videoHeight;
-            frameCanvas.getContext("2d").drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
-          }
-          const ctx = frameCanvas.getContext("2d");
-          const bandHeight = frameCanvas.height / 3;
-          function avgColor(yStart, yEnd) {
-            const imgData = ctx.getImageData(0, yStart, frameCanvas.width, yEnd - yStart);
-            let r = 0, g = 0, b = 0, count = 0;
-            for (let i = 0; i < imgData.data.length; i += 4) {
-              r += imgData.data[i];
-              g += imgData.data[i+1];
-              b += imgData.data[i+2];
-              count++;
-            }
-            return `rgb(${Math.floor(r/count)},${Math.floor(g/count)},${Math.floor(b/count)})`;
-          }
-          const colorTop = avgColor(0, bandHeight);
-          const colorMid = avgColor(bandHeight, 2 * bandHeight);
-          const colorBot = avgColor(2 * bandHeight, frameCanvas.height);
-          let gradient = resultCtx.createLinearGradient(0, 0, 0, res.height);
-          gradient.addColorStop(0, colorTop);
-          gradient.addColorStop(0.5, colorMid);
-          gradient.addColorStop(1, colorBot);
-          resultCtx.fillStyle = gradient;
-          resultCtx.fillRect(currentSlice, 0, 1, res.height);
-          currentSlice++;
-          video.removeEventListener("seeked", onSeeked);
-          processSlice();
-        }, { once: true });
-      }
-      processSlice();
-    }
-    
-    // Gaussian Mode
-    function processVideoGaussian(crop, effectiveStart, effectiveEnd) {
-      finalImageBlobURL = null;
-      currentSliceGlobal = 0;
-      const res = getEffectiveResolution();
-      resultCanvas.width = res.width;
-      resultCanvas.height = res.height;
-      const totalSlices = res.width;
-      const resultCtx = resultCanvas.getContext("2d");
-      let currentSlice = 0;
-      startElapsedTimer();
-      function processSlice() {
-        if (currentSlice >= totalSlices) {
-          updateFinalImageBlobURL();
-          return;
-        }
-        currentSliceGlobal = currentSlice;
-        let targetTime = effectiveStart + (currentSlice / totalSlices) * (effectiveEnd - effectiveStart) + 0.0001;
-        video.currentTime = targetTime;
-        video.addEventListener("seeked", function onSeeked() {
-          let tempCanvas = document.createElement("canvas");
-          tempCanvas.width = 1;
-          tempCanvas.height = res.height;
-          let tempCtx = tempCanvas.getContext("2d");
-          if (crop) {
-            tempCtx.drawImage(video, crop.cropX, crop.cropY, crop.cropWidth, crop.cropHeight, 0, 0, 1, res.height);
-          } else {
-            tempCtx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight, 0, 0, 1, res.height);
-          }
-          tempCtx.filter = "blur(3px)";
-          let blurredCanvas = document.createElement("canvas");
-          blurredCanvas.width = 1;
-          blurredCanvas.height = res.height;
-          let blurredCtx = blurredCanvas.getContext("2d");
-          blurredCtx.drawImage(tempCanvas, 0, 0);
-          resultCtx.drawImage(blurredCanvas, 0, 0, 1, res.height, currentSlice, 0, 1, res.height);
-          currentSlice++;
-          video.removeEventListener("seeked", onSeeked);
-          processSlice();
-        }, { once: true });
-      }
-      processSlice();
-    }
-    
-    // Median Mode
     function processVideoMedian(crop, effectiveStart, effectiveEnd) {
       finalImageBlobURL = null;
+      cleanBaseImageData = null;
       currentSliceGlobal = 0;
       const res = getEffectiveResolution();
       resultCanvas.width = res.width;
@@ -1050,9 +990,12 @@
       offCanvas.width = 1;
       offCanvas.height = res.height;
       let offCtx = offCanvas.getContext("2d");
+      offCtx.imageSmoothingEnabled = smoothingEnabledGlobal;
+      if (smoothingEnabledGlobal) offCtx.imageSmoothingQuality = "high";
       let currentSlice = 0;
       startElapsedTimer();
       function processSlice() {
+        if (shouldCancel()) return;
         if (currentSlice >= totalSlices) {
           updateFinalImageBlobURL();
           return;
@@ -1061,6 +1004,9 @@
         let targetTime = effectiveStart + (currentSlice / totalSlices) * (effectiveEnd - effectiveStart) + 0.0001;
         video.currentTime = targetTime;
         video.addEventListener("seeked", function onSeeked() {
+          if (shouldCancel()) return;
+          offCtx.imageSmoothingEnabled = smoothingEnabledGlobal;
+          if (smoothingEnabledGlobal) offCtx.imageSmoothingQuality = "high";
           if (crop) {
             offCtx.drawImage(video, crop.cropX, crop.cropY, crop.cropWidth, crop.cropHeight, 0, 0, 1, res.height);
           } else {
@@ -1086,47 +1032,114 @@
       processSlice();
     }
     
-    // Mood Button Event using Dropdown Mode Selector
-    moodButton.addEventListener("click", () => {
-      const mode = document.getElementById("modeSelect").value;
-      let processFunc = null;
-      switch (mode) {
-        case "color":
-          processFunc = processVideo16x9;
-          break;
-        case "stretch":
-          processFunc = processVideoStretched16x9;
-          break;
-        case "smooth":
-          processFunc = processVideoExperimental;
-          break;
-        case "rowSample":
-          processFunc = processVideoRowSample;
-          break;
-        case "multiBand":
-          processFunc = processVideoMultiBand;
-          break;
-        case "gaussian":
-          processFunc = processVideoGaussian;
-          break;
-        case "median":
-          processFunc = processVideoMedian;
-          break;
-        default:
-          processFunc = processVideo16x9;
+    function processVideoPixel(crop, effectiveStart, effectiveEnd) {
+      finalImageBlobURL = null;
+      cleanBaseImageData = null;
+      currentSliceGlobal = 0;
+      const res = getEffectiveResolution();
+      resultCanvas.width = res.width;
+      resultCanvas.height = res.height;
+      const cellSize = 100;
+      const cols = Math.ceil(res.width / cellSize);
+      const rows = Math.ceil(res.height / cellSize);
+      const totalCells = cols * rows;
+      const resultCtx = resultCanvas.getContext("2d");
+      resultCtx.imageSmoothingEnabled = false;
+      if (!crop) {
+        frameCanvas.width = video.videoWidth;
+        frameCanvas.height = video.videoHeight;
       }
-      runProcess(processFunc);
-    });
+      const frameCtx = frameCanvas.getContext("2d");
+      frameCtx.imageSmoothingEnabled = smoothingEnabledGlobal;
+      let cellIndex = 0;
+      startElapsedTimer();
+      function processNextCell() {
+        if (shouldCancel()) return;
+        if (cellIndex >= totalCells) {
+          updateFinalImageBlobURL();
+          return;
+        }
+        currentSliceGlobal = cellIndex;
+        let tMid = effectiveStart + ((cellIndex + 0.5) / totalCells) * (effectiveEnd - effectiveStart) + 0.0001;
+        video.currentTime = tMid;
+        video.addEventListener("seeked", function onSeeked() {
+          if (shouldCancel()) return;
+          if (crop) {
+            frameCtx.drawImage(video, crop.cropX, crop.cropY, crop.cropWidth, crop.cropHeight, 0, 0, crop.cropWidth, crop.cropHeight);
+          } else {
+            frameCtx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
+          }
+          const imageData = frameCtx.getImageData(0, 0, frameCanvas.width, frameCanvas.height);
+          let r = 0, g = 0, b = 0, count = 0;
+          for (let i = 0; i < imageData.data.length; i += 4) {
+            r += imageData.data[i];
+            g += imageData.data[i+1];
+            b += imageData.data[i+2];
+            count++;
+          }
+          r = Math.floor(r / count);
+          g = Math.floor(g / count);
+          b = Math.floor(b / count);
+          const col = cellIndex % cols;
+          const row = Math.floor(cellIndex / cols);
+          resultCtx.fillStyle = `rgb(${r}, ${g}, ${b})`;
+          resultCtx.fillRect(col * cellSize, row * cellSize, cellSize, cellSize);
+          cellIndex++;
+          video.removeEventListener("seeked", onSeeked);
+          processNextCell();
+        }, { once: true });
+      }
+      processNextCell();
+    }
     
-    function runProcess(processFunc) {
+    function getSelectedMode() {
+      const radios = document.getElementsByName("modePreset");
+      for (let i = 0; i < radios.length; i++) {
+        if (radios[i].checked) { return radios[i].value; }
+      }
+      return "color";
+    }
+    
+    moodButton.addEventListener("click", () => {
       if (!video.src) {
         alert("Please select or drop a video file first.");
         return;
       }
+      if (isGenerating) {
+        cancelRequested = true;
+      } else {
+        isGenerating = true;
+        cancelRequested = false;
+        cleanBaseImageData = null;
+        // Change button text to "Cancel" when generating
+        moodButton.innerHTML = '<span class="mood">Cancel</span>';
+        moodButton.classList.add("cancel-mode");
+        const selectedMode = getSelectedMode();
+        smoothingEnabledGlobal = (selectedMode !== "color");
+        let processFunc = null;
+        switch (selectedMode) {
+          case "color":
+            processFunc = processVideo16x9;
+            break;
+          case "gradient":
+            processFunc = processVideoExperimental;
+            break;
+          case "stretch":
+            processFunc = processVideoMedian;
+            break;
+          case "pixel":
+            processFunc = processVideoPixel;
+            break;
+          default:
+            processFunc = processVideo16x9;
+        }
+        runProcess(processFunc);
+      }
+    });
+    
+    function runProcess(processFunc) {
       startElapsedTimer();
-      detectCropBoundaries(() => {
-        processWithCropAndRange(processFunc);
-      });
+      detectCropBoundaries(() => { processWithCropAndRange(processFunc); });
     }
     
     function processWithCropAndRange(processFunc) {
@@ -1159,7 +1172,7 @@
             const lum = 0.2126 * data[i] + 0.7152 * data[i+1] + 0.0722 * data[i+2];
             if (lum < pixelThreshold) { blackCount++; }
           }
-          if ((blackCount/width) < blackRatio) { topCrop = y; break; }
+          if ((blackCount / width) < blackRatio) { topCrop = y; break; }
         }
         for (let y = height - 1; y >= 0; y--) {
           let blackCount = 0;
@@ -1168,7 +1181,7 @@
             const lum = 0.2126 * data[i] + 0.7152 * data[i+1] + 0.0722 * data[i+2];
             if (lum < pixelThreshold) { blackCount++; }
           }
-          if ((blackCount/width) < blackRatio) { bottomCrop = y; break; }
+          if ((blackCount / width) < blackRatio) { bottomCrop = y; break; }
         }
         const cropHeight = bottomCrop - topCrop;
         const crop = { cropX: 0, cropY: topCrop, cropWidth: width, cropHeight: cropHeight };
@@ -1180,7 +1193,6 @@
       }, { once: true });
     }
     
-    // Output Size Selection Events
     const sizeRadios = document.getElementsByName("sizePreset");
     for (let i = 0; i < sizeRadios.length; i++) {
       sizeRadios[i].addEventListener("change", () => {
@@ -1200,17 +1212,17 @@
       updatePlaceholderImage();
     });
     
-    // When Film Grain toggle changes, update the final image.
     filmGrainToggle.addEventListener("change", () => {
-      if (finalImageBlobURL) {
-        updateFinalImageBlobURL();
-      }
+      updateFinalImageBlobURL();
     });
     
     window.addEventListener("load", () => {
-      if (!video.src) {
-        updatePlaceholderImage();
-      }
+      if (!video.src) { updatePlaceholderImage(); }
+      const bgCanvas = document.getElementById("bgCanvas");
+      bgCanvas.width = window.innerWidth;
+      bgCanvas.height = window.innerHeight;
+      const bgCtx = bgCanvas.getContext("2d");
+      applyFilmGrainOverlay(bgCtx, bgCanvas.width, bgCanvas.height, 0.05);
     });
     
     setStartButton.addEventListener("click", () => {
