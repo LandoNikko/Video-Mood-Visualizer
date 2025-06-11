@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Video Mood Visualizer</title>
+  <!-- Google Fonts: Playwrite US Modern (Thin 100) for h1; Victor Mono (ExtraLight 200) for body text -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playwrite+US+Modern:wght@100&family=Victor+Mono:wght@200&display=swap" rel="stylesheet">
+  <style>
+    /* Global Styles */
+    body {
+      margin: 0;
+      padding: 20px;
+      background-color: #24272c;
+      color: #f1f1f1;
+      font-family: 'Victor Mono', monospace;
+      font-weight: 200;
+    }
+    h1 {
+      font-family: 'Playwrite US Modern', sans-serif;
+      font-size: 3rem;
+      text-align: center;
+      margin: 10px 0 20px;
+      animation: fadeInUp 1s ease-out;
+      color: #ffffff;
+    }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    /* Main Container: left column (drop zone & loading) and right column (controls) */
+    .main-container {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 40px;
+      max-width: 1200px;
+      margin: 0 auto 20px;
+    }
+    .left-column {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      width: 300px;
+    }
+    /* Drop Zone */
+    #dropZone {
+      width: 300px;
+      padding: 40px 20px;
+      border: 2px dashed #626466;
+      border-radius: 12px;
+      background-color: #1f2226;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      cursor: pointer;
+      transition: background-color 0.2s, border-color 0.2s;
+    }
+    #dropZone.hover {
+      background-color: #272a2e;
+      border-color: #8a8a8a;
+    }
+    #uploadIcon {
+      margin-bottom: 16px;
+    }
+    #uploadIcon svg {
+      width: 48px;
+      height: 48px;
+      fill: #f1f1f1;
+    }
+    #dropZoneText {
+      margin-bottom: 16px;
+      font-size: 1rem;
+    }
+    #selectFileButton {
+      padding: 10px 20px;
+      font-size: 1rem;
+      background-color: #505050;
+      border: none;
+      border-radius: 9999px;
+      color: #fff;
+      cursor: pointer;
+      transition: background-color 0.2s, border 0.2s;
+    }
+    #dropZone:hover #selectFileButton {
+      background-color: #474747;
+    }
+    #selectFileButton.file-selected {
+      background-color: transparent;
+      border: 1px solid rgba(255,255,255,0.8);
+    }
+    #selectFileButton.file-selected:hover {
+      border-color: rgba(255,255,255,1);
+    }
+    /* Loading Bar */
+    #loadingBarContainer {
+      width: 300px;
+      height: 10px;
+      background-color: #3a3c40;
+      border-radius: 5px;
+      margin: 0 auto;
+      display: none;
+    }
+    #loadingBar {
+      height: 100%;
+      width: 0%;
+      background-color: #6447ff;
+      border-radius: 5px;
+      transition: width 0.3s;
+    }
+    /* Right Column: toggles, slider, range, and buttons */
+    .right-column {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      align-items: flex-start;
+      width: 300px;
+    }
+    .toggle-container {
+      font-size: 1rem;
+      color: #ccc;
+    }
+    .toggle-container label {
+      display: block;
+      margin-bottom: 4px;
+    }
+    .toggle-container input {
+      margin-right: 8px;
+    }
+    .slider-container, .range-container {
+      width: 300px;
+    }
+    .slider-container label, .range-container label {
+      display: block;
+      font-size: 1rem;
+      margin-bottom: 6px;
+      text-align: left;
+      color: #ccc;
+    }
+    .slider-container .slider-wrapper,
+    .range-container .range-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .slider-container .slider-wrapper input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      flex: 1;
+      height: 2px;
+      background: #3a3c40;
+      border-radius: 2px;
+      outline: none;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .slider-container .slider-wrapper input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #ffffff;
+      border: none;
+    }
+    .slider-container .slider-wrapper span {
+      min-width: 20px;
+      text-align: right;
+    }
+    .range-container .range-wrapper input[type="number"] {
+      width: 100%;
+      padding: 4px;
+      font-size: 1rem;
+      border: 1px solid #3a3c40;
+      border-radius: 4px;
+      background-color: #1f2226;
+      color: #f1f1f1;
+    }
+    /* Buttons */
+    .buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      width: 300px;
+    }
+    .buttons button {
+      padding: 12px 24px;
+      font-size: 1rem;
+      border: none;
+      border-radius: 9999px;
+      background-color: #6447ff;
+      color: #fff;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      white-space: nowrap;
+    }
+    .buttons button:hover {
+      background-color: #5d40f0;
+    }
+    /* Result Canvas */
+    #resultCanvas {
+      display: block;
+      margin: 20px auto;
+      border: 1px solid #3a3c40;
+      cursor: pointer;
+    }
+    /* Open image link */
+    #openImageLink {
+      display: block;
+      text-align: center;
+      margin-top: 10px;
+      font-size: 1rem;
+      text-decoration: underline;
+      color: #aaddff;
+      cursor: pointer;
+    }
+    #openImageLink:hover {
+      color: #ffecaa;
+    }
+  </style>
+</head>
+<body>
+  <h1>Video Mood Visualizer</h1>
+  <div class="main-container">
+    <!-- Left Column: Drop Zone and Loading Bar -->
+    <div class="left-column">
+      <div id="dropZone">
+        <div id="uploadIcon">
+          <svg viewBox="0 0 24 24">
+            <path d="M12 2l5.5 9h-4v9h-3v-9h-4l5.5-9z"/>
+          </svg>
+        </div>
+        <div id="dropZoneText">Drag and drop a video file to upload</div>
+        <button id="selectFileButton" type="button">Select file</button>
+        <input type="file" id="videoInput" accept="video/*" style="display: none;">
+      </div>
+      <div id="loadingBarContainer">
+        <div id="loadingBar"></div>
+      </div>
+    </div>
+
+    <!-- Right Column: Toggles, Slider, Custom Range, and Buttons -->
+    <div class="right-column">
+      <div class="toggle-container">
+        <label>
+          <input type="checkbox" id="cropToggle">
+          Use Black Bar Detection
+        </label>
+      </div>
+      <div class="slider-container">
+        <label for="intervalInput">Frame Interval (seconds):</label>
+        <div class="slider-wrapper">
+          <input type="range" id="intervalInput" min="1" max="20" value="1">
+          <span id="intervalValue">1</span>
+        </div>
+      </div>
+      <div class="range-container">
+        <label>Processing Range (seconds):</label>
+        <div class="range-wrapper">
+          <input type="number" id="startTimeInput" placeholder="Start" value="0">
+          <input type="number" id="endTimeInput" placeholder="End">
+        </div>
+      </div>
+      <div class="buttons">
+        <button id="processButton">Generate Color Timeline</button>
+        <button id="processButton16x9">Generate Color Timeline (16x9)</button>
+        <button id="processButtonStretched">Generate Stretched Timeline</button>
+        <button id="processButtonStretched16x9">Generate Stretched Timeline (16x9)</button>
+        <button id="processButtonExperimental">Experimental (16:9)</button>
+      </div>
+    </div>
+  </div>
+
+  <canvas id="resultCanvas"></canvas>
+  <div id="openImageLink" style="display:none;">Open image in new tab</div>
+
+  <!-- Hidden elements for processing -->
+  <video id="video" style="display: none;"></video>
+  <canvas id="frameCanvas" style="display: none;"></canvas>
+
+  <script>
+    // Global variables
+    let cropData = null;
+    let finalImageBlobURL = null;
+    let loadingInterval = null;
+
+    // Helper: update slider background
+    function updateSliderBackground(slider) {
+      const val = slider.value;
+      const min = slider.min;
+      const max = slider.max;
+      const pct = ((val - min) * 100) / (max - min);
+      slider.style.background = `linear-gradient(to right, #6447ff 0%, #6447ff ${pct}%, #3a3c40 ${pct}%, #3a3c40 100%)`;
+    }
+
+    // Get DOM elements
+    const videoInput = document.getElementById("videoInput");
+    const video = document.getElementById("video");
+    const frameCanvas = document.getElementById("frameCanvas");
+    const resultCanvas = document.getElementById("resultCanvas");
+
+    const processButton = document.getElementById("processButton");
+    const processButton16x9 = document.getElementById("processButton16x9");
+    const processButtonStretched = document.getElementById("processButtonStretched");
+    const processButtonStretched16x9 = document.getElementById("processButtonStretched16x9");
+    const processButtonExperimental = document.getElementById("processButtonExperimental");
+
+    const intervalInput = document.getElementById("intervalInput");
+    const intervalValue = document.getElementById("intervalValue");
+
+    const selectFileButton = document.getElementById("selectFileButton");
+    const dropZone = document.getElementById("dropZone");
+    const dropZoneText = document.getElementById("dropZoneText");
+
+    const cropToggle = document.getElementById("cropToggle");
+    const startTimeInput = document.getElementById("startTimeInput");
+    const endTimeInput = document.getElementById("endTimeInput");
+    const openImageLink = document.getElementById("openImageLink");
+    const loadingBarContainer = document.getElementById("loadingBarContainer");
+    const loadingBar = document.getElementById("loadingBar");
+
+    // Initialize slider background
+    updateSliderBackground(intervalInput);
+    intervalInput.addEventListener("input", () => {
+      intervalValue.textContent = intervalInput.value;
+      updateSliderBackground(intervalInput);
+    });
+
+    // Loading bar functions
+    function startLoadingBar() {
+      loadingBar.style.width = "0%";
+      loadingBarContainer.style.display = "block";
+      let progress = 0;
+      loadingInterval = setInterval(() => {
+        progress += 5;
+        if (progress > 95) progress = 95;
+        loadingBar.style.width = progress + "%";
+      }, 100);
+    }
+    function stopLoadingBar() {
+      if (loadingInterval) {
+        clearInterval(loadingInterval);
+        loadingInterval = null;
+      }
+      loadingBar.style.width = "100%";
+      setTimeout(() => { loadingBarContainer.style.display = "none"; }, 500);
+    }
+
+    // Video file selection: start loading bar while metadata loads
+    videoInput.addEventListener("change", (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        video.src = URL.createObjectURL(file);
+        dropZoneText.textContent = file.name;
+        selectFileButton.textContent = "File selected";
+        startLoadingBar();
+        video.addEventListener("loadedmetadata", () => {
+          stopLoadingBar();
+        }, { once: true });
+      }
+    });
+    dropZone.addEventListener("click", () => videoInput.click());
+    selectFileButton.addEventListener("click", (e) => {
+      e.stopPropagation();
+      videoInput.click();
+    });
+    dropZone.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      dropZone.classList.add("hover");
+    });
+    dropZone.addEventListener("dragleave", (e) => {
+      e.preventDefault();
+      dropZone.classList.remove("hover");
+    });
+    dropZone.addEventListener("drop", (e) => {
+      e.preventDefault();
+      dropZone.classList.remove("hover");
+      const file = e.dataTransfer.files[0];
+      if (file) {
+        video.src = URL.createObjectURL(file);
+        dropZoneText.textContent = file.name;
+        selectFileButton.textContent = "File selected";
+        startLoadingBar();
+        video.addEventListener("loadedmetadata", () => {
+          stopLoadingBar();
+        }, { once: true });
+      }
+    });
+
+    // Clicking the result canvas or link opens the final image in a new tab
+    resultCanvas.addEventListener("click", () => {
+      if (finalImageBlobURL) window.open(finalImageBlobURL, "_blank");
+    });
+    openImageLink.addEventListener("click", () => {
+      if (finalImageBlobURL) window.open(finalImageBlobURL, "_blank");
+    });
+    function updateFinalImageBlobURL() {
+      resultCanvas.toBlob((blob) => {
+        if (blob) {
+          if (finalImageBlobURL) URL.revokeObjectURL(finalImageBlobURL);
+          finalImageBlobURL = URL.createObjectURL(blob);
+          openImageLink.style.display = "block";
+        }
+      }, "image/png");
+    }
+
+    // ---------------------------
+    // Helper: Get Processing Range from user inputs
+    // ---------------------------
+    function getProcessingRange() {
+      const start = parseFloat(startTimeInput.value);
+      const end = parseFloat(endTimeInput.value);
+      const effectiveStart = isNaN(start) ? 0 : start;
+      const effectiveEnd = isNaN(end) ? video.duration : end;
+      return { effectiveStart, effectiveEnd };
+    }
+
+    // ---------------------------
+    // Black Bar Detection
+    // ---------------------------
+    function detectCropBoundaries(callback) {
+      video.currentTime = video.duration / 2;
+      video.addEventListener("seeked", function onSeeked() {
+        frameCanvas.width = video.videoWidth;
+        frameCanvas.height = video.videoHeight;
+        const ctx = frameCanvas.getContext("2d");
+        ctx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
+        const imageData = ctx.getImageData(0, 0, video.videoWidth, video.videoHeight);
+        const data = imageData.data;
+        const width = video.videoWidth;
+        const height = video.videoHeight;
+        const threshold = 20;
+        let cropY = 0, cropBottom = height;
+        for (let y = 0; y < height; y++) {
+          let sum = 0;
+          for (let x = 0; x < width; x++) {
+            const idx = (y * width + x) * 4;
+            sum += data[idx];
+          }
+          if ((sum / width) > threshold) {
+            cropY = y;
+            break;
+          }
+        }
+        for (let y = height - 1; y >= 0; y--) {
+          let sum = 0;
+          for (let x = 0; x < width; x++) {
+            const idx = (y * width + x) * 4;
+            sum += data[idx];
+          }
+          if ((sum / width) > threshold) {
+            cropBottom = y;
+            break;
+          }
+        }
+        const cropHeight = cropBottom - cropY;
+        const crop = { cropX: 0, cropY: cropY, cropWidth: width, cropHeight: cropHeight };
+        frameCanvas.width = crop.cropWidth;
+        frameCanvas.height = crop.cropHeight;
+        cropData = crop;
+        video.removeEventListener("seeked", onSeeked);
+        callback(crop);
+      }, { once: true });
+    }
+
+    // ---------------------------
+    // Wrapper: Process with Crop and Processing Range
+    // ---------------------------
+    function processWithCropAndRange(processFunc) {
+      const range = getProcessingRange();
+      const effectiveStart = range.effectiveStart;
+      const effectiveEnd = range.effectiveEnd;
+      function callProcess(crop) {
+        processFunc(crop, effectiveStart, effectiveEnd);
+      }
+      if (cropToggle.checked) {
+        detectCropBoundaries(function(crop) {
+          callProcess(crop);
+        });
+      } else {
+        callProcess(null);
+      }
+    }
+
+    // ---------------------------
+    // MODE 1: "Generate Color Timeline" (600px tall, 5px slice width)
+    // ---------------------------
+    processButton.addEventListener("click", () => {
+      if (!video.src) {
+        alert("Please select or drop a video file first.");
+        return;
+      }
+      processWithCropAndRange(processVideo);
+    });
+    function processVideo(crop, effectiveStart, effectiveEnd) {
+      openImageLink.style.display = "none";
+      finalImageBlobURL = null;
+      const intervalSec = parseFloat(intervalInput.value);
+      const effectiveDuration = effectiveEnd - effectiveStart;
+      resultCanvas.width = Math.floor(effectiveDuration / intervalSec) * 5;
+      resultCanvas.height = 600;
+      const resultCtx = resultCanvas.getContext("2d");
+      if (!crop) {
+        frameCanvas.width = video.videoWidth;
+        frameCanvas.height = video.videoHeight;
+      }
+      const frameCtx = frameCanvas.getContext("2d");
+      let currentFrame = 0;
+      function processFrame() {
+        const currentTime = effectiveStart + currentFrame * intervalSec;
+        if (currentTime > effectiveEnd) {
+          console.log("Processing complete (fixed timeline)");
+          updateFinalImageBlobURL();
+          return;
+        }
+        video.currentTime = currentTime;
+        video.addEventListener("seeked", function onSeeked() {
+          if (crop) {
+            frameCtx.drawImage(video, crop.cropX, crop.cropY, crop.cropWidth, crop.cropHeight,
+                               0, 0, crop.cropWidth, crop.cropHeight);
+          } else {
+            frameCtx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
+          }
+          const imageData = frameCtx.getImageData(0, 0, frameCanvas.width, frameCanvas.height);
+          let r = 0, g = 0, b = 0, count = 0;
+          for (let i = 0; i < imageData.data.length; i += 4) {
+            r += imageData.data[i];
+            g += imageData.data[i + 1];
+            b += imageData.data[i + 2];
+            count++;
+          }
+          r = Math.floor(r / count);
+          g = Math.floor(g / count);
+          b = Math.floor(b / count);
+          resultCtx.fillStyle = `rgb(${r}, ${g}, ${b})`;
+          resultCtx.fillRect(currentFrame * 5, 0, 5, resultCanvas.height);
+          currentFrame++;
+          video.removeEventListener("seeked", onSeeked);
+          processFrame();
+        }, { once: true });
+      }
+      processFrame();
+    }
+
+    // ---------------------------
+    // MODE 2: "Generate Color Timeline (16x9)" (1600x900, 1px slices)
+    // ---------------------------
+    processButton16x9.addEventListener("click", () => {
+      if (!video.src) {
+        alert("Please select or drop a video file first.");
+        return;
+      }
+      processWithCropAndRange(processVideo16x9);
+    });
+    function processVideo16x9(crop, effectiveStart, effectiveEnd) {
+      openImageLink.style.display = "none";
+      finalImageBlobURL = null;
+      const effectiveDuration = effectiveEnd - effectiveStart;
+      const totalSlices = 1600;
+      resultCanvas.width = totalSlices;
+      resultCanvas.height = 900;
+      const resultCtx = resultCanvas.getContext("2d");
+      if (!crop) {
+        frameCanvas.width = video.videoWidth;
+        frameCanvas.height = video.videoHeight;
+      }
+      const frameCtx = frameCanvas.getContext("2d");
+      let currentSlice = 0;
+      function processSlice() {
+        if (currentSlice >= totalSlices) {
+          console.log("Processing complete (16x9 mode)");
+          updateFinalImageBlobURL();
+          return;
+        }
+        const currentTime = effectiveStart + (currentSlice / totalSlices) * effectiveDuration;
+        video.currentTime = currentTime;
+        video.addEventListener("seeked", function onSeeked() {
+          if (crop) {
+            frameCtx.drawImage(video, crop.cropX, crop.cropY, crop.cropWidth, crop.cropHeight,
+                               0, 0, crop.cropWidth, crop.cropHeight);
+          } else {
+            frameCtx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
+          }
+          const imageData = frameCtx.getImageData(0, 0, frameCanvas.width, frameCanvas.height);
+          let r = 0, g = 0, b = 0, count = 0;
+          for (let i = 0; i < imageData.data.length; i += 4) {
+            r += imageData.data[i];
+            g += imageData.data[i + 1];
+            b += imageData.data[i + 2];
+            count++;
+          }
+          r = Math.floor(r / count);
+          g = Math.floor(g / count);
+          b = Math.floor(b / count);
+          resultCtx.fillStyle = `rgb(${r}, ${g}, ${b})`;
+          resultCtx.fillRect(currentSlice, 0, 1, resultCanvas.height);
+          currentSlice++;
+          video.removeEventListener("seeked", onSeeked);
+          processSlice();
+        }, { once: true });
+      }
+      processSlice();
+    }
+
+    // ---------------------------
+    // MODE 3: "Generate Stretched Timeline" (stretched frames, 1px wide × 900px tall)
+    // ---------------------------
+    processButtonStretched.addEventListener("click", () => {
+      if (!video.src) {
+        alert("Please select or drop a video file first.");
+        return;
+      }
+      processWithCropAndRange(processVideoStretched);
+    });
+    function processVideoStretched(crop, effectiveStart, effectiveEnd) {
+      openImageLink.style.display = "none";
+      finalImageBlobURL = null;
+      const intervalSec = parseFloat(intervalInput.value);
+      const effectiveDuration = effectiveEnd - effectiveStart;
+      const totalFrames = Math.floor(effectiveDuration / intervalSec);
+      resultCanvas.width = totalFrames;
+      resultCanvas.height = 900;
+      const resultCtx = resultCanvas.getContext("2d");
+      let currentFrame = 0;
+      function processSlice() {
+        const currentTime = effectiveStart + currentFrame * intervalSec;
+        if (currentTime > effectiveEnd) {
+          console.log("Processing complete (stretched mode)");
+          updateFinalImageBlobURL();
+          return;
+        }
+        video.currentTime = currentTime;
+        video.addEventListener("seeked", function onSeeked() {
+          if (crop) {
+            resultCtx.drawImage(video,
+              crop.cropX, crop.cropY, crop.cropWidth, crop.cropHeight,
+              currentFrame, 0, 1, 900);
+          } else {
+            resultCtx.drawImage(video,
+              0, 0, video.videoWidth, video.videoHeight,
+              currentFrame, 0, 1, 900);
+          }
+          currentFrame++;
+          video.removeEventListener("seeked", onSeeked);
+          processSlice();
+        }, { once: true });
+      }
+      processSlice();
+    }
+
+    // ---------------------------
+    // MODE 4: "Generate Stretched Timeline (16x9)" (stretched frames over 1600 columns)
+    // ---------------------------
+    processButtonStretched16x9.addEventListener("click", () => {
+      if (!video.src) {
+        alert("Please select or drop a video file first.");
+        return;
+      }
+      processWithCropAndRange(processVideoStretched16x9);
+    });
+    function processVideoStretched16x9(crop, effectiveStart, effectiveEnd) {
+      openImageLink.style.display = "none";
+      finalImageBlobURL = null;
+      const effectiveDuration = effectiveEnd - effectiveStart;
+      const totalSlices = 1600;
+      resultCanvas.width = totalSlices;
+      resultCanvas.height = 900;
+      const resultCtx = resultCanvas.getContext("2d");
+      let currentSlice = 0;
+      function processSlice() {
+        if (currentSlice >= totalSlices) {
+          console.log("Processing complete (stretched 16x9)");
+          updateFinalImageBlobURL();
+          return;
+        }
+        const currentTime = effectiveStart + (currentSlice / totalSlices) * effectiveDuration;
+        video.currentTime = currentTime;
+        video.addEventListener("seeked", function onSeeked() {
+          if (crop) {
+            resultCtx.drawImage(video,
+              crop.cropX, crop.cropY, crop.cropWidth, crop.cropHeight,
+              currentSlice, 0, 1, 900);
+          } else {
+            resultCtx.drawImage(video,
+              0, 0, video.videoWidth, video.videoHeight,
+              currentSlice, 0, 1, 900);
+          }
+          currentSlice++;
+          video.removeEventListener("seeked", onSeeked);
+          processSlice();
+        }, { once: true });
+      }
+      processSlice();
+    }
+
+    // ---------------------------
+    // MODE 5: "Experimental (16:9)" with Blur
+    // For each of 1600 columns, downscale the (cropped) frame to 1×900 using a temporary canvas with high smoothing.
+    // ---------------------------
+    processButtonExperimental.addEventListener("click", () => {
+      if (!video.src) {
+        alert("Please select or drop a video file first.");
+        return;
+      }
+      processWithCropAndRange(processVideoExperimental);
+    });
+    function processVideoExperimental(crop, effectiveStart, effectiveEnd) {
+      openImageLink.style.display = "none";
+      finalImageBlobURL = null;
+      const effectiveDuration = effectiveEnd - effectiveStart;
+      const totalSlices = 1600;
+      resultCanvas.width = totalSlices;
+      resultCanvas.height = 900;
+      const resultCtx = resultCanvas.getContext("2d");
+      if (!crop) {
+        frameCanvas.width = video.videoWidth;
+        frameCanvas.height = video.videoHeight;
+      }
+      const frameCtx = frameCanvas.getContext("2d");
+      // Temporary canvas for downscaling with blur effect
+      const tempCanvas = document.createElement("canvas");
+      tempCanvas.width = 1;
+      tempCanvas.height = 900;
+      const tempCtx = tempCanvas.getContext("2d");
+      tempCtx.imageSmoothingEnabled = true;
+      tempCtx.imageSmoothingQuality = "high";
+      
+      let currentSlice = 0;
+      function processSlice() {
+        if (currentSlice >= totalSlices) {
+          console.log("Processing complete (experimental mode)");
+          updateFinalImageBlobURL();
+          return;
+        }
+        const currentTime = effectiveStart + (currentSlice / totalSlices) * effectiveDuration;
+        video.currentTime = currentTime;
+        video.addEventListener("seeked", function onSeeked() {
+          if (crop) {
+            frameCtx.drawImage(video,
+              crop.cropX, crop.cropY, crop.cropWidth, crop.cropHeight,
+              0, 0, crop.cropWidth, crop.cropHeight);
+          } else {
+            frameCtx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
+          }
+          tempCtx.clearRect(0, 0, 1, 900);
+          tempCtx.drawImage(frameCanvas, 0, 0, frameCanvas.width, frameCanvas.height, 0, 0, 1, 900);
+          resultCtx.drawImage(tempCanvas, 0, 0, 1, 900, currentSlice, 0, 1, 900);
+          currentSlice++;
+          video.removeEventListener("seeked", onSeeked);
+          processSlice();
+        }, { once: true });
+      }
+      processSlice();
+    }
+  </script>
+</body>
+</html>
