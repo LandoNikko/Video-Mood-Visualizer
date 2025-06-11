@@ -1,4 +1,7 @@
-[![Try it][demo-shield]][demo-url]   [![GitHub][github-shield]][github-url]   [![Email][gmail-shield]][gmail-url]   ![Discord: ABC Status][discord-shield-static]
+[![License][license-shield]][license-url]   [![GitHub][github-shield]][github-url]   [![Email][gmail-shield]][gmail-url]   ![Discord: ABC Status][discord-shield-static]
+
+[license-shield]: https://img.shields.io/badge/License-GPL%20v2-5f43f2?style=for-the-badge&labelColor=0b0b0b&logo=gnu&logoColor=5f43f2
+[license-url]: LICENSE
 
 [demo-shield]: https://img.shields.io/badge/Try_it-0b0b0b?style=for-the-badge&color=0b0b0b
 [demo-url]: URL
@@ -17,6 +20,8 @@ The Video Mood Visualizer is a web app that locally transforms a video into a si
 
 Try it here: https://landonikko.github.io/Video-Mood-Visualizer
 
+![VideoMoodVisualizer](https://github.com/user-attachments/assets/e3d11c25-2c3c-4c6f-ac8b-42c67077f0f3)
+
 ## ![Features Shield][features-shield]
 
 - **Automatic Black Bar Removal:** Intelligently crops out letterboxing/pillarboxing.
@@ -32,10 +37,22 @@ Try it here: https://landonikko.github.io/Video-Mood-Visualizer
 
 [features-shield]: https://img.shields.io/badge/Features-5f43f2?style=for-the-badge&color=0b0b0b
 
+## ![Examples][examples-shield]
+
+Source video: https://www.youtube.com/watch?v=_cMxraX_5RE
+
+| Color | Stretch |
+|:----:|:-----:|
+| ![Mood_Color](https://github.com/user-attachments/assets/7e50ae9c-b2d5-4d76-8c78-ae512bae2be5) | ![Mood_Stretch](https://github.com/user-attachments/assets/74fcc6ba-0832-4c7f-abbb-1463a4436a82) | 
+| Gradient | Pixel |
+| ![Mood_Gradient](https://github.com/user-attachments/assets/ce3d5de7-e93a-4981-8708-69fb0d3983d0) | ![Mood_Pixel](https://github.com/user-attachments/assets/0aaf6685-24db-45ac-8c90-6c3c94dfef1f) |
+
+[examples-shield]: https://img.shields.io/badge/Examples-5f43f2?style=for-the-badge&color=0b0b0b
+
 ## ![Privacy & Processing Shield][processing-shield]
 
 - No cloud processing or installations.
-- 100% client-side: built with HTML, CSS, and JavaScript.
+- 100% client-side: built with HTML, CSS and JavaScript.
 - Mood images are stored temporarily in your browser as blobs.
 
 [processing-shield]: https://img.shields.io/badge/Privacy%20&%20Processing-5f43f2?style=for-the-badge&color=0b0b0b
@@ -52,21 +69,10 @@ The tool sequentially samples frames from your video. For each sample, it calcul
 
 [how-it-works-shield]: https://img.shields.io/badge/How_it_Works-5f43f2?style=for-the-badge&color=0b0b0b
 
-<!-- Optional: Add a Demo video like in the example if you have one -->
-<!--
-## ![Demo Shield][demo-section-shield]
-
-<video src="URL_TO_YOUR_DEMO_VIDEO" controls width="600"></video>
-
-[demo-section-shield]: https://img.shields.io/badge/Demo-00c6ff?style=for-the-badge&color=121727
--->
-
-## ![Feedback & Contributions Shield][feedback-shield]
+## ![Feedback & Contributions Shield][feedback-shield]   [![License][license-shield]][license-url]
 
 Contributions, bug reports and suggestions are welcome!
 
-[![Email][gmail-shield]][gmail-url]   ![Discord: ABC Status][discord-shield-static] <!-- Update or remove Discord -->
+[![Email][gmail-shield]][gmail-url]   ![Discord: ABC Status][discord-shield-static]
 
-[feedback-shield]: https://img.shields.io/badge/Feedback%20&%20Contribute-242c44?style=for-the-badge&color=121727&logo=github&logoColor=5f43f2
-
-MIT License
+[feedback-shield]: https://img.shields.io/badge/Feedback%20&%20Contribute-5f43f2?style=for-the-badge&color=0b0b0b&logo=github&logoColor=e0e6f7
