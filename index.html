@@ -29,7 +29,8 @@
       from { opacity: 0; transform: translateY(20px); }
       to { opacity: 1; transform: translateY(0); }
     }
-    /* Main Container: left column (drop zone & loading) and right column (controls) */
+
+    /* Main Container */
     .main-container {
       display: flex;
       justify-content: center;
@@ -38,13 +39,14 @@
       max-width: 1200px;
       margin: 0 auto 20px;
     }
+
+    /* Left Column: Drop Zone & Loading Bar */
     .left-column {
       display: flex;
       flex-direction: column;
       gap: 10px;
       width: 300px;
     }
-    /* Drop Zone */
     #dropZone {
       width: 300px;
       padding: 40px 20px;
@@ -95,6 +97,7 @@
     #selectFileButton.file-selected:hover {
       border-color: rgba(255,255,255,1);
     }
+
     /* Loading Bar */
     #loadingBarContainer {
       width: 300px;
@@ -111,102 +114,180 @@
       border-radius: 5px;
       transition: width 0.3s;
     }
-    /* Right Column: toggles, slider, range, and buttons */
+
+    /* Automatic/Manual Toggle – Two buttons together, centered, equal width */
+    .tab-buttons {
+      display: flex;
+      width: 400px;            /* total fixed width */
+      margin: 20px auto;       /* center horizontally with vertical margin */
+    }
+    /* Left button: rounded left corners; no right border */
+    .tab-buttons .mode-tab:first-child {
+      flex: 1;
+      padding: 12px 24px;
+      font-size: 1rem;
+      box-sizing: border-box;
+      border: 1px solid;
+      border-right: none;
+      border-radius: 9999px 0 0 9999px;
+      transition: background-color 0.2s, color 0.2s;
+      cursor: pointer;
+    }
+    /* Right button: rounded right corners; no left border */
+    .tab-buttons .mode-tab:last-child {
+      flex: 1;
+      padding: 12px 24px;
+      font-size: 1rem;
+      box-sizing: border-box;
+      border: 1px solid;
+      border-left: none;
+      border-radius: 0 9999px 9999px 0;
+      transition: background-color 0.2s, color 0.2s;
+      cursor: pointer;
+    }
+    /* Active button: white background, black text, black border */
+    .tab-buttons .mode-tab.active {
+      background-color: #fff;
+      color: #000;
+      border-color: black;
+    }
+    /* Inactive button: background #0f0f0f, white text, white border */
+    .tab-buttons .mode-tab:not(.active) {
+      background-color: #0f0f0f;
+      color: #fff;
+      border-color: white;
+    }
+    /* Hover effects for toggle buttons */
+    .tab-buttons .mode-tab:not(.active):hover {
+      background-color: #1a1a1a;
+    }
+    .tab-buttons .mode-tab.active:hover {
+      background-color: #f7f7f7;
+    }
+
+    /* Right Column: Containers for Automatic & Manual Modes */
     .right-column {
+      width: 300px;
+    }
+    #automaticContainer, #manualContainer {
+      width: 300px;
+      border: 1px solid #3a3c40;
+      padding: 10px;
+      border-radius: 6px;
+      background-color: #1f2226;
+    }
+    /* Automatic mode: keep only 16:9 buttons */
+    #automaticContainer .buttons {
       display: flex;
       flex-direction: column;
-      gap: 20px;
-      align-items: flex-start;
-      width: 300px;
+      gap: 10px;
+      margin-top: 10px;
     }
-    .toggle-container {
-      font-size: 1rem;
-      color: #ccc;
-    }
-    .toggle-container label {
+    #automaticContainer button#processButton16x9,
+    #automaticContainer button#processButtonStretched16x9,
+    #automaticContainer button#processButtonExperimental {
       display: block;
-      margin-bottom: 4px;
     }
-    .toggle-container input {
-      margin-right: 8px;
+    #automaticContainer button#processButton,
+    #automaticContainer button#processButtonStretched {
+      display: none;
     }
-    .slider-container, .range-container {
-      width: 300px;
+
+    /* Manual mode: remove interval slider and non‑16:9 buttons */
+    #manualContainer .slider-container {
+      display: none;
     }
-    .slider-container label, .range-container label {
+    #manualContainer .buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    #manualContainer button#processButton16x9Manual,
+    #manualContainer button#processButtonStretched16x9Manual,
+    #manualContainer button#processButtonExperimentalManual {
+      display: block;
+    }
+    #manualContainer button#processButtonManual,
+    #manualContainer button#processButtonStretchedManual {
+      display: none;
+    }
+    /* Range container remains in Manual mode */
+    .range-container, .toggle-container {
+      margin-bottom: 10px;
+    }
+    .range-container label,
+    .toggle-container label {
       display: block;
       font-size: 1rem;
       margin-bottom: 6px;
-      text-align: left;
       color: #ccc;
     }
-    .slider-container .slider-wrapper,
-    .range-container .range-wrapper {
+    .range-wrapper {
       display: flex;
       align-items: center;
       gap: 10px;
     }
-    .slider-container .slider-wrapper input[type="range"] {
-      -webkit-appearance: none;
-      appearance: none;
-      flex: 1;
-      height: 2px;
-      background: #3a3c40;
-      border-radius: 2px;
-      outline: none;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-    .slider-container .slider-wrapper input[type="range"]::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      width: 16px;
-      height: 16px;
-      border-radius: 50%;
-      background: #ffffff;
-      border: none;
-    }
-    .slider-container .slider-wrapper span {
-      min-width: 20px;
-      text-align: right;
-    }
-    .range-container .range-wrapper input[type="number"] {
+    .range-wrapper input[type="number"] {
       width: 100%;
       padding: 4px;
-      font-size: 1rem;
       border: 1px solid #3a3c40;
       border-radius: 4px;
       background-color: #1f2226;
       color: #f1f1f1;
     }
-    /* Buttons */
-    .buttons {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
+
+    /* Manual Mode Video Player */
+    #manualVideo {
       width: 300px;
+      border: 2px dashed #626466;
+      border-radius: 6px;
+      background-color: #1f2226;
+      margin-bottom: 10px;
     }
+    .manual-buttons {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .manual-buttons button {
+      flex: 1;
+      padding: 8px;
+      font-size: 1rem;
+      border: none;
+      border-radius: 6px;
+      background-color: #000;
+      color: #fff;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    .manual-buttons button:hover {
+      background-color: #222;
+    }
+
+    /* Processing Mode Buttons (common to both modes) */
     .buttons button {
       padding: 12px 24px;
       font-size: 1rem;
       border: none;
       border-radius: 9999px;
-      background-color: #6447ff;
+      background-color: #000;
       color: #fff;
       cursor: pointer;
       transition: background-color 0.2s;
       white-space: nowrap;
     }
     .buttons button:hover {
-      background-color: #5d40f0;
+      background-color: #222;
     }
-    /* Result Canvas */
+
+    /* Result Canvas & Open Link */
     #resultCanvas {
       display: block;
       margin: 20px auto;
       border: 1px solid #3a3c40;
       cursor: pointer;
     }
-    /* Open image link */
     #openImageLink {
       display: block;
       text-align: center;
@@ -223,8 +304,16 @@
 </head>
 <body>
   <h1>Video Mood Visualizer</h1>
+
+  <!-- Tab Buttons -->
+  <div class="tab-buttons">
+    <button class="mode-tab active" data-mode="automatic">Automatic</button>
+    <button class="mode-tab" data-mode="manual">Manual</button>
+  </div>
+
+  <!-- Main Container -->
   <div class="main-container">
-    <!-- Left Column: Drop Zone and Loading Bar -->
+    <!-- Left Column: Drop Zone & Loading Bar -->
     <div class="left-column">
       <div id="dropZone">
         <div id="uploadIcon">
@@ -241,34 +330,42 @@
       </div>
     </div>
 
-    <!-- Right Column: Toggles, Slider, Custom Range, and Buttons -->
+    <!-- Right Column: Containers for Automatic & Manual Modes -->
     <div class="right-column">
-      <div class="toggle-container">
-        <label>
-          <input type="checkbox" id="cropToggle">
-          Use Black Bar Detection
-        </label>
-      </div>
-      <div class="slider-container">
-        <label for="intervalInput">Frame Interval (seconds):</label>
-        <div class="slider-wrapper">
-          <input type="range" id="intervalInput" min="1" max="20" value="1">
-          <span id="intervalValue">1</span>
+      <!-- Automatic Container -->
+      <div id="automaticContainer">
+        <p>Using default parameters (entire video).</p>
+        <div class="buttons">
+          <button id="processButton16x9">Color</button>
+          <button id="processButtonStretched16x9">Stretch</button>
+          <button id="processButtonExperimental">Blur</button>
         </div>
       </div>
-      <div class="range-container">
-        <label>Processing Range (seconds):</label>
-        <div class="range-wrapper">
-          <input type="number" id="startTimeInput" placeholder="Start" value="0">
-          <input type="number" id="endTimeInput" placeholder="End">
+      <!-- Manual Container -->
+      <div id="manualContainer" style="display:none;">
+        <div class="toggle-container extra">
+          <label>
+            <input type="checkbox" id="cropToggle">
+            Use Black Bar Detection
+          </label>
         </div>
-      </div>
-      <div class="buttons">
-        <button id="processButton">Generate Color Timeline</button>
-        <button id="processButton16x9">Generate Color Timeline (16x9)</button>
-        <button id="processButtonStretched">Generate Stretched Timeline</button>
-        <button id="processButtonStretched16x9">Generate Stretched Timeline (16x9)</button>
-        <button id="processButtonExperimental">Experimental (16:9)</button>
+        <div class="range-container extra">
+          <label>Processing Range (seconds):</label>
+          <div class="range-wrapper">
+            <input type="number" id="startTimeInput" placeholder="Start" value="0">
+            <input type="number" id="endTimeInput" placeholder="End">
+          </div>
+        </div>
+        <video id="manualVideo" controls></video>
+        <div class="manual-buttons extra">
+          <button id="setStartButton">Set Start</button>
+          <button id="setEndButton">Set End</button>
+        </div>
+        <div class="buttons">
+          <button id="processButton16x9Manual">Color</button>
+          <button id="processButtonStretched16x9Manual">Stretch</button>
+          <button id="processButtonExperimentalManual">Blur</button>
+        </div>
       </div>
     </div>
   </div>
@@ -286,46 +383,95 @@
     let finalImageBlobURL = null;
     let loadingInterval = null;
 
-    // Helper: update slider background
-    function updateSliderBackground(slider) {
-      const val = slider.value;
-      const min = slider.min;
-      const max = slider.max;
-      const pct = ((val - min) * 100) / (max - min);
-      slider.style.background = `linear-gradient(to right, #6447ff 0%, #6447ff ${pct}%, #3a3c40 ${pct}%, #3a3c40 100%)`;
-    }
+    // (Slider code removed as slider is not used now)
 
     // Get DOM elements
     const videoInput = document.getElementById("videoInput");
     const video = document.getElementById("video");
+    const manualVideo = document.getElementById("manualVideo");
     const frameCanvas = document.getElementById("frameCanvas");
     const resultCanvas = document.getElementById("resultCanvas");
 
-    const processButton = document.getElementById("processButton");
+    // Automatic mode processing buttons
     const processButton16x9 = document.getElementById("processButton16x9");
-    const processButtonStretched = document.getElementById("processButtonStretched");
     const processButtonStretched16x9 = document.getElementById("processButtonStretched16x9");
     const processButtonExperimental = document.getElementById("processButtonExperimental");
 
-    const intervalInput = document.getElementById("intervalInput");
-    const intervalValue = document.getElementById("intervalValue");
+    // Manual mode processing buttons
+    const processButton16x9Manual = document.getElementById("processButton16x9Manual");
+    const processButtonStretched16x9Manual = document.getElementById("processButtonStretched16x9Manual");
+    const processButtonExperimentalManual = document.getElementById("processButtonExperimentalManual");
+
+    const startTimeInput = document.getElementById("startTimeInput");
+    const endTimeInput = document.getElementById("endTimeInput");
 
     const selectFileButton = document.getElementById("selectFileButton");
     const dropZone = document.getElementById("dropZone");
     const dropZoneText = document.getElementById("dropZoneText");
 
     const cropToggle = document.getElementById("cropToggle");
-    const startTimeInput = document.getElementById("startTimeInput");
-    const endTimeInput = document.getElementById("endTimeInput");
     const openImageLink = document.getElementById("openImageLink");
-    const loadingBarContainer = document.getElementById("loadingBarContainer");
-    const loadingBar = document.getElementById("loadingBar");
 
-    // Initialize slider background
-    updateSliderBackground(intervalInput);
-    intervalInput.addEventListener("input", () => {
-      intervalValue.textContent = intervalInput.value;
-      updateSliderBackground(intervalInput);
+    const setStartButton = document.getElementById("setStartButton");
+    const setEndButton = document.getElementById("setEndButton");
+
+    const modeTabs = document.querySelectorAll(".mode-tab");
+    const automaticContainer = document.getElementById("automaticContainer");
+    const manualContainer = document.getElementById("manualContainer");
+
+    // Switch between Automatic and Manual modes
+    modeTabs.forEach(tab => {
+      tab.addEventListener("click", () => {
+        modeTabs.forEach(t => t.classList.remove("active"));
+        tab.classList.add("active");
+        const mode = tab.getAttribute("data-mode");
+        if (mode === "automatic") {
+          automaticContainer.style.display = "block";
+          manualContainer.style.display = "none";
+        } else {
+          automaticContainer.style.display = "none";
+          manualContainer.style.display = "block";
+        }
+      });
+    });
+
+    // Video file selection and loading
+    videoInput.addEventListener("change", (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        video.src = URL.createObjectURL(file);
+        manualVideo.src = video.src;
+        dropZoneText.textContent = file.name;
+        selectFileButton.textContent = "File selected";
+        startLoadingBar();
+        video.addEventListener("loadedmetadata", () => { stopLoadingBar(); }, { once: true });
+      }
+    });
+    dropZone.addEventListener("click", () => videoInput.click());
+    selectFileButton.addEventListener("click", (e) => {
+      e.stopPropagation();
+      videoInput.click();
+    });
+    dropZone.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      dropZone.classList.add("hover");
+    });
+    dropZone.addEventListener("dragleave", (e) => {
+      e.preventDefault();
+      dropZone.classList.remove("hover");
+    });
+    dropZone.addEventListener("drop", (e) => {
+      e.preventDefault();
+      dropZone.classList.remove("hover");
+      const file = e.dataTransfer.files[0];
+      if (file) {
+        video.src = URL.createObjectURL(file);
+        manualVideo.src = video.src;
+        dropZoneText.textContent = file.name;
+        selectFileButton.textContent = "File selected";
+        startLoadingBar();
+        video.addEventListener("loadedmetadata", () => { stopLoadingBar(); }, { once: true });
+      }
     });
 
     // Loading bar functions
@@ -348,48 +494,7 @@
       setTimeout(() => { loadingBarContainer.style.display = "none"; }, 500);
     }
 
-    // Video file selection: start loading bar while metadata loads
-    videoInput.addEventListener("change", (e) => {
-      const file = e.target.files[0];
-      if (file) {
-        video.src = URL.createObjectURL(file);
-        dropZoneText.textContent = file.name;
-        selectFileButton.textContent = "File selected";
-        startLoadingBar();
-        video.addEventListener("loadedmetadata", () => {
-          stopLoadingBar();
-        }, { once: true });
-      }
-    });
-    dropZone.addEventListener("click", () => videoInput.click());
-    selectFileButton.addEventListener("click", (e) => {
-      e.stopPropagation();
-      videoInput.click();
-    });
-    dropZone.addEventListener("dragover", (e) => {
-      e.preventDefault();
-      dropZone.classList.add("hover");
-    });
-    dropZone.addEventListener("dragleave", (e) => {
-      e.preventDefault();
-      dropZone.classList.remove("hover");
-    });
-    dropZone.addEventListener("drop", (e) => {
-      e.preventDefault();
-      dropZone.classList.remove("hover");
-      const file = e.dataTransfer.files[0];
-      if (file) {
-        video.src = URL.createObjectURL(file);
-        dropZoneText.textContent = file.name;
-        selectFileButton.textContent = "File selected";
-        startLoadingBar();
-        video.addEventListener("loadedmetadata", () => {
-          stopLoadingBar();
-        }, { once: true });
-      }
-    });
-
-    // Clicking the result canvas or link opens the final image in a new tab
+    // Clicking the result canvas or open link opens the final image in a new tab
     resultCanvas.addEventListener("click", () => {
       if (finalImageBlobURL) window.open(finalImageBlobURL, "_blank");
     });
@@ -406,9 +511,15 @@
       }, "image/png");
     }
 
-    // ---------------------------
-    // Helper: Get Processing Range from user inputs
-    // ---------------------------
+    // Manual Range Buttons: set start/end from manual video currentTime
+    setStartButton.addEventListener("click", () => {
+      startTimeInput.value = Math.floor(manualVideo.currentTime);
+    });
+    setEndButton.addEventListener("click", () => {
+      endTimeInput.value = Math.floor(manualVideo.currentTime);
+    });
+
+    // Helper: Get processing range from user inputs
     function getProcessingRange() {
       const start = parseFloat(startTimeInput.value);
       const end = parseFloat(endTimeInput.value);
@@ -417,9 +528,7 @@
       return { effectiveStart, effectiveEnd };
     }
 
-    // ---------------------------
     // Black Bar Detection
-    // ---------------------------
     function detectCropBoundaries(callback) {
       video.currentTime = video.duration / 2;
       video.addEventListener("seeked", function onSeeked() {
@@ -465,15 +574,11 @@
       }, { once: true });
     }
 
-    // ---------------------------
     // Wrapper: Process with Crop and Processing Range
-    // ---------------------------
-    function processWithCropAndRange(processFunc) {
-      const range = getProcessingRange();
-      const effectiveStart = range.effectiveStart;
-      const effectiveEnd = range.effectiveEnd;
+    function processWithCropAndRange(processFunc, manual) {
+      let range = manual ? getProcessingRange() : { effectiveStart: 0, effectiveEnd: video.duration };
       function callProcess(crop) {
-        processFunc(crop, effectiveStart, effectiveEnd);
+        processFunc(crop, range.effectiveStart, range.effectiveEnd);
       }
       if (cropToggle.checked) {
         detectCropBoundaries(function(crop) {
@@ -484,76 +589,9 @@
       }
     }
 
-    // ---------------------------
-    // MODE 1: "Generate Color Timeline" (600px tall, 5px slice width)
-    // ---------------------------
-    processButton.addEventListener("click", () => {
-      if (!video.src) {
-        alert("Please select or drop a video file first.");
-        return;
-      }
-      processWithCropAndRange(processVideo);
-    });
-    function processVideo(crop, effectiveStart, effectiveEnd) {
-      openImageLink.style.display = "none";
-      finalImageBlobURL = null;
-      const intervalSec = parseFloat(intervalInput.value);
-      const effectiveDuration = effectiveEnd - effectiveStart;
-      resultCanvas.width = Math.floor(effectiveDuration / intervalSec) * 5;
-      resultCanvas.height = 600;
-      const resultCtx = resultCanvas.getContext("2d");
-      if (!crop) {
-        frameCanvas.width = video.videoWidth;
-        frameCanvas.height = video.videoHeight;
-      }
-      const frameCtx = frameCanvas.getContext("2d");
-      let currentFrame = 0;
-      function processFrame() {
-        const currentTime = effectiveStart + currentFrame * intervalSec;
-        if (currentTime > effectiveEnd) {
-          console.log("Processing complete (fixed timeline)");
-          updateFinalImageBlobURL();
-          return;
-        }
-        video.currentTime = currentTime;
-        video.addEventListener("seeked", function onSeeked() {
-          if (crop) {
-            frameCtx.drawImage(video, crop.cropX, crop.cropY, crop.cropWidth, crop.cropHeight,
-                               0, 0, crop.cropWidth, crop.cropHeight);
-          } else {
-            frameCtx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
-          }
-          const imageData = frameCtx.getImageData(0, 0, frameCanvas.width, frameCanvas.height);
-          let r = 0, g = 0, b = 0, count = 0;
-          for (let i = 0; i < imageData.data.length; i += 4) {
-            r += imageData.data[i];
-            g += imageData.data[i + 1];
-            b += imageData.data[i + 2];
-            count++;
-          }
-          r = Math.floor(r / count);
-          g = Math.floor(g / count);
-          b = Math.floor(b / count);
-          resultCtx.fillStyle = `rgb(${r}, ${g}, ${b})`;
-          resultCtx.fillRect(currentFrame * 5, 0, 5, resultCanvas.height);
-          currentFrame++;
-          video.removeEventListener("seeked", onSeeked);
-          processFrame();
-        }, { once: true });
-      }
-      processFrame();
-    }
+    /* --- Processing Functions --- */
 
-    // ---------------------------
-    // MODE 2: "Generate Color Timeline (16x9)" (1600x900, 1px slices)
-    // ---------------------------
-    processButton16x9.addEventListener("click", () => {
-      if (!video.src) {
-        alert("Please select or drop a video file first.");
-        return;
-      }
-      processWithCropAndRange(processVideo16x9);
-    });
+    // Color (16x9)
     function processVideo16x9(crop, effectiveStart, effectiveEnd) {
       openImageLink.style.display = "none";
       finalImageBlobURL = null;
@@ -570,7 +608,6 @@
       let currentSlice = 0;
       function processSlice() {
         if (currentSlice >= totalSlices) {
-          console.log("Processing complete (16x9 mode)");
           updateFinalImageBlobURL();
           return;
         }
@@ -578,8 +615,7 @@
         video.currentTime = currentTime;
         video.addEventListener("seeked", function onSeeked() {
           if (crop) {
-            frameCtx.drawImage(video, crop.cropX, crop.cropY, crop.cropWidth, crop.cropHeight,
-                               0, 0, crop.cropWidth, crop.cropHeight);
+            frameCtx.drawImage(video, crop.cropX, crop.cropY, crop.cropWidth, crop.cropHeight, 0, 0, crop.cropWidth, crop.cropHeight);
           } else {
             frameCtx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
           }
@@ -604,62 +640,7 @@
       processSlice();
     }
 
-    // ---------------------------
-    // MODE 3: "Generate Stretched Timeline" (stretched frames, 1px wide × 900px tall)
-    // ---------------------------
-    processButtonStretched.addEventListener("click", () => {
-      if (!video.src) {
-        alert("Please select or drop a video file first.");
-        return;
-      }
-      processWithCropAndRange(processVideoStretched);
-    });
-    function processVideoStretched(crop, effectiveStart, effectiveEnd) {
-      openImageLink.style.display = "none";
-      finalImageBlobURL = null;
-      const intervalSec = parseFloat(intervalInput.value);
-      const effectiveDuration = effectiveEnd - effectiveStart;
-      const totalFrames = Math.floor(effectiveDuration / intervalSec);
-      resultCanvas.width = totalFrames;
-      resultCanvas.height = 900;
-      const resultCtx = resultCanvas.getContext("2d");
-      let currentFrame = 0;
-      function processSlice() {
-        const currentTime = effectiveStart + currentFrame * intervalSec;
-        if (currentTime > effectiveEnd) {
-          console.log("Processing complete (stretched mode)");
-          updateFinalImageBlobURL();
-          return;
-        }
-        video.currentTime = currentTime;
-        video.addEventListener("seeked", function onSeeked() {
-          if (crop) {
-            resultCtx.drawImage(video,
-              crop.cropX, crop.cropY, crop.cropWidth, crop.cropHeight,
-              currentFrame, 0, 1, 900);
-          } else {
-            resultCtx.drawImage(video,
-              0, 0, video.videoWidth, video.videoHeight,
-              currentFrame, 0, 1, 900);
-          }
-          currentFrame++;
-          video.removeEventListener("seeked", onSeeked);
-          processSlice();
-        }, { once: true });
-      }
-      processSlice();
-    }
-
-    // ---------------------------
-    // MODE 4: "Generate Stretched Timeline (16x9)" (stretched frames over 1600 columns)
-    // ---------------------------
-    processButtonStretched16x9.addEventListener("click", () => {
-      if (!video.src) {
-        alert("Please select or drop a video file first.");
-        return;
-      }
-      processWithCropAndRange(processVideoStretched16x9);
-    });
+    // Stretch (16x9)
     function processVideoStretched16x9(crop, effectiveStart, effectiveEnd) {
       openImageLink.style.display = "none";
       finalImageBlobURL = null;
@@ -671,7 +652,6 @@
       let currentSlice = 0;
       function processSlice() {
         if (currentSlice >= totalSlices) {
-          console.log("Processing complete (stretched 16x9)");
           updateFinalImageBlobURL();
           return;
         }
@@ -679,13 +659,9 @@
         video.currentTime = currentTime;
         video.addEventListener("seeked", function onSeeked() {
           if (crop) {
-            resultCtx.drawImage(video,
-              crop.cropX, crop.cropY, crop.cropWidth, crop.cropHeight,
-              currentSlice, 0, 1, 900);
+            resultCtx.drawImage(video, crop.cropX, crop.cropY, crop.cropWidth, crop.cropHeight, currentSlice, 0, 1, 900);
           } else {
-            resultCtx.drawImage(video,
-              0, 0, video.videoWidth, video.videoHeight,
-              currentSlice, 0, 1, 900);
+            resultCtx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight, currentSlice, 0, 1, 900);
           }
           currentSlice++;
           video.removeEventListener("seeked", onSeeked);
@@ -695,17 +671,7 @@
       processSlice();
     }
 
-    // ---------------------------
-    // MODE 5: "Experimental (16:9)" with Blur
-    // For each of 1600 columns, downscale the (cropped) frame to 1×900 using a temporary canvas with high smoothing.
-    // ---------------------------
-    processButtonExperimental.addEventListener("click", () => {
-      if (!video.src) {
-        alert("Please select or drop a video file first.");
-        return;
-      }
-      processWithCropAndRange(processVideoExperimental);
-    });
+    // Blur (Experimental 16:9)
     function processVideoExperimental(crop, effectiveStart, effectiveEnd) {
       openImageLink.style.display = "none";
       finalImageBlobURL = null;
@@ -719,18 +685,15 @@
         frameCanvas.height = video.videoHeight;
       }
       const frameCtx = frameCanvas.getContext("2d");
-      // Temporary canvas for downscaling with blur effect
       const tempCanvas = document.createElement("canvas");
       tempCanvas.width = 1;
       tempCanvas.height = 900;
       const tempCtx = tempCanvas.getContext("2d");
       tempCtx.imageSmoothingEnabled = true;
       tempCtx.imageSmoothingQuality = "high";
-      
       let currentSlice = 0;
       function processSlice() {
         if (currentSlice >= totalSlices) {
-          console.log("Processing complete (experimental mode)");
           updateFinalImageBlobURL();
           return;
         }
@@ -738,9 +701,7 @@
         video.currentTime = currentTime;
         video.addEventListener("seeked", function onSeeked() {
           if (crop) {
-            frameCtx.drawImage(video,
-              crop.cropX, crop.cropY, crop.cropWidth, crop.cropHeight,
-              0, 0, crop.cropWidth, crop.cropHeight);
+            frameCtx.drawImage(video, crop.cropX, crop.cropY, crop.cropWidth, crop.cropHeight, 0, 0, crop.cropWidth, crop.cropHeight);
           } else {
             frameCtx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
           }
@@ -754,6 +715,36 @@
       }
       processSlice();
     }
+
+    /* --- Attach Event Listeners --- */
+
+    // Automatic mode buttons
+    processButton16x9.addEventListener("click", () => {
+      if (!video.src) { alert("Please select or drop a video file first."); return; }
+      processWithCropAndRange(processVideo16x9, false);
+    });
+    processButtonStretched16x9.addEventListener("click", () => {
+      if (!video.src) { alert("Please select or drop a video file first."); return; }
+      processWithCropAndRange(processVideoStretched16x9, false);
+    });
+    processButtonExperimental.addEventListener("click", () => {
+      if (!video.src) { alert("Please select or drop a video file first."); return; }
+      processWithCropAndRange(processVideoExperimental, false);
+    });
+
+    // Manual mode buttons
+    processButton16x9Manual.addEventListener("click", () => {
+      if (!video.src) { alert("Please select or drop a video file first."); return; }
+      processWithCropAndRange(processVideo16x9, true);
+    });
+    processButtonStretched16x9Manual.addEventListener("click", () => {
+      if (!video.src) { alert("Please select or drop a video file first."); return; }
+      processWithCropAndRange(processVideoStretched16x9, true);
+    });
+    processButtonExperimentalManual.addEventListener("click", () => {
+      if (!video.src) { alert("Please select or drop a video file first."); return; }
+      processWithCropAndRange(processVideoExperimental, true);
+    });
   </script>
 </body>
 </html>
