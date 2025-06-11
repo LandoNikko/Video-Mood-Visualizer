@@ -29,8 +29,24 @@
       from { opacity: 0; transform: translateY(20px); }
       to { opacity: 1; transform: translateY(0); }
     }
-
-    /* Main Container */
+    
+    /* Column Titles */
+    .column-title {
+      font-size: 1.2rem;
+      text-align: center;
+      margin-bottom: 10px;
+      color: #ccc;
+    }
+    
+    /* Subtle Box for Generate & Edit columns */
+    .column-box {
+      background-color: #1c1c1c;
+      border: 1px solid #3a3c40;
+      border-radius: 6px;
+      padding: 10px;
+    }
+    
+    /* Main Container: 3 columns */
     .main-container {
       display: flex;
       justify-content: center;
@@ -39,27 +55,27 @@
       max-width: 1200px;
       margin: 0 auto 20px;
     }
-
-    /* Left Column: Drop Zone & Loading Bar */
-    .left-column {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
+    .column-upload,
+    .column-manual,
+    .column-generate {
       width: 300px;
     }
+    
+    /* Column 1: Upload */
+    .column-upload {
+      text-align: center;
+    }
     #dropZone {
-      width: 300px;
+      width: 100%;
       padding: 40px 20px;
       border: 2px dashed #626466;
       border-radius: 12px;
       background-color: #1f2226;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
+      display: block;
       cursor: pointer;
       transition: background-color 0.2s, border-color 0.2s;
+      margin: 0 auto 10px;
+      box-sizing: border-box;
     }
     #dropZone.hover {
       background-color: #272a2e;
@@ -97,10 +113,9 @@
     #selectFileButton.file-selected:hover {
       border-color: rgba(255,255,255,1);
     }
-
     /* Loading Bar */
     #loadingBarContainer {
-      width: 300px;
+      width: 100%;
       height: 10px;
       background-color: #3a3c40;
       border-radius: 5px;
@@ -114,121 +129,68 @@
       border-radius: 5px;
       transition: width 0.3s;
     }
-
-    /* Automatic/Manual Toggle – Two buttons together, centered, equal width */
-    .tab-buttons {
-      display: flex;
-      width: 400px;            /* total fixed width */
-      margin: 20px auto;       /* center horizontally with vertical margin */
-    }
-    /* Left button: rounded left corners; no right border */
-    .tab-buttons .mode-tab:first-child {
-      flex: 1;
-      padding: 12px 24px;
-      font-size: 1rem;
-      box-sizing: border-box;
-      border: 1px solid;
-      border-right: none;
-      border-radius: 9999px 0 0 9999px;
-      transition: background-color 0.2s, color 0.2s;
-      cursor: pointer;
-    }
-    /* Right button: rounded right corners; no left border */
-    .tab-buttons .mode-tab:last-child {
-      flex: 1;
-      padding: 12px 24px;
-      font-size: 1rem;
-      box-sizing: border-box;
-      border: 1px solid;
-      border-left: none;
-      border-radius: 0 9999px 9999px 0;
-      transition: background-color 0.2s, color 0.2s;
-      cursor: pointer;
-    }
-    /* Active button: white background, black text, black border */
-    .tab-buttons .mode-tab.active {
-      background-color: #fff;
-      color: #000;
-      border-color: black;
-    }
-    /* Inactive button: background #0f0f0f, white text, white border */
-    .tab-buttons .mode-tab:not(.active) {
-      background-color: #0f0f0f;
-      color: #fff;
-      border-color: white;
-    }
-    /* Hover effects for toggle buttons */
-    .tab-buttons .mode-tab:not(.active):hover {
-      background-color: #1a1a1a;
-    }
-    .tab-buttons .mode-tab.active:hover {
-      background-color: #f7f7f7;
-    }
-
-    /* Right Column: Containers for Automatic & Manual Modes */
-    .right-column {
-      width: 300px;
-    }
-    #automaticContainer, #manualContainer {
-      width: 300px;
-      border: 1px solid #3a3c40;
-      padding: 10px;
-      border-radius: 6px;
-      background-color: #1f2226;
-    }
-    /* Automatic mode: keep only 16:9 buttons */
-    #automaticContainer .buttons {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      margin-top: 10px;
-    }
-    #automaticContainer button#processButton16x9,
-    #automaticContainer button#processButtonStretched16x9,
-    #automaticContainer button#processButtonExperimental {
-      display: block;
-    }
-    #automaticContainer button#processButton,
-    #automaticContainer button#processButtonStretched {
-      display: none;
-    }
-
-    /* Manual mode: remove interval slider and non‑16:9 buttons */
-    #manualContainer .slider-container {
-      display: none;
-    }
-    #manualContainer .buttons {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      margin-top: 10px;
-    }
-    #manualContainer button#processButton16x9Manual,
-    #manualContainer button#processButtonStretched16x9Manual,
-    #manualContainer button#processButtonExperimentalManual {
-      display: block;
-    }
-    #manualContainer button#processButtonManual,
-    #manualContainer button#processButtonStretchedManual {
-      display: none;
-    }
-    /* Range container remains in Manual mode */
-    .range-container, .toggle-container {
+    
+    /* Column 2: Edit */
+    .column-manual .toggle-container,
+    .column-manual .range-container {
       margin-bottom: 10px;
     }
-    .range-container label,
-    .toggle-container label {
-      display: block;
+    .column-manual .toggle-container label {
       font-size: 1rem;
       margin-bottom: 6px;
       color: #ccc;
+      display: inline-block;
+      margin-right: 10px;
     }
-    .range-wrapper {
+    /* Custom Toggle Switch */
+    .toggle-switch {
+      position: relative;
+      display: inline-block;
+      width: 50px;
+      height: 24px;
+      vertical-align: middle;
+    }
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #555;
+      transition: .4s;
+      border-radius: 24px;
+    }
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 20px;
+      width: 20px;
+      left: 2px;
+      bottom: 2px;
+      background-color: #fff;
+      transition: .4s;
+      border-radius: 50%;
+    }
+    .toggle-switch input:checked + .slider {
+      background-color: #6447ff;
+    }
+    .toggle-switch input:checked + .slider:before {
+      transform: translateX(26px);
+    }
+    
+    /* Range inputs (Processing Range) placed below video */
+    .column-manual .range-wrapper {
       display: flex;
       align-items: center;
       gap: 10px;
     }
-    .range-wrapper input[type="number"] {
+    .column-manual .range-wrapper input[type="number"] {
       width: 100%;
       padding: 4px;
       border: 1px solid #3a3c40;
@@ -236,21 +198,19 @@
       background-color: #1f2226;
       color: #f1f1f1;
     }
-
-    /* Manual Mode Video Player */
-    #manualVideo {
-      width: 300px;
+    .column-manual video {
+      width: 100%;
       border: 2px dashed #626466;
       border-radius: 6px;
       background-color: #1f2226;
       margin-bottom: 10px;
     }
-    .manual-buttons {
+    .column-manual .manual-buttons {
       display: flex;
       gap: 10px;
       margin-bottom: 10px;
     }
-    .manual-buttons button {
+    .column-manual .manual-buttons button {
       flex: 1;
       padding: 8px;
       font-size: 1rem;
@@ -261,12 +221,18 @@
       cursor: pointer;
       transition: background-color 0.2s;
     }
-    .manual-buttons button:hover {
+    .column-manual .manual-buttons button:hover {
       background-color: #222;
     }
-
-    /* Processing Mode Buttons (common to both modes) */
-    .buttons button {
+    
+    /* Column 3: Generate */
+    .column-generate .buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .column-generate .buttons button {
       padding: 12px 24px;
       font-size: 1rem;
       border: none;
@@ -277,10 +243,10 @@
       transition: background-color 0.2s;
       white-space: nowrap;
     }
-    .buttons button:hover {
+    .column-generate .buttons button:hover {
       background-color: #222;
     }
-
+    
     /* Result Canvas & Open Link */
     #resultCanvas {
       display: block;
@@ -304,17 +270,12 @@
 </head>
 <body>
   <h1>Video Mood Visualizer</h1>
-
-  <!-- Tab Buttons -->
-  <div class="tab-buttons">
-    <button class="mode-tab active" data-mode="automatic">Automatic</button>
-    <button class="mode-tab" data-mode="manual">Manual</button>
-  </div>
-
-  <!-- Main Container -->
+  
+  <!-- Main 3-Column Container -->
   <div class="main-container">
-    <!-- Left Column: Drop Zone & Loading Bar -->
-    <div class="left-column">
+    <!-- Column 1: Upload -->
+    <div class="column-upload">
+      <h2 class="column-title">Upload</h2>
       <div id="dropZone">
         <div id="uploadIcon">
           <svg viewBox="0 0 24 24">
@@ -329,26 +290,19 @@
         <div id="loadingBar"></div>
       </div>
     </div>
-
-    <!-- Right Column: Containers for Automatic & Manual Modes -->
-    <div class="right-column">
-      <!-- Automatic Container -->
-      <div id="automaticContainer">
-        <p>Using default parameters (entire video).</p>
-        <div class="buttons">
-          <button id="processButton16x9">Color</button>
-          <button id="processButtonStretched16x9">Stretch</button>
-          <button id="processButtonExperimental">Blur</button>
-        </div>
-      </div>
-      <!-- Manual Container -->
-      <div id="manualContainer" style="display:none;">
+    
+    <!-- Column 2: Edit -->
+    <div class="column-manual">
+      <h2 class="column-title">Edit</h2>
+      <div class="column-box">
         <div class="toggle-container extra">
-          <label>
+          <label>Remove black bars</label>
+          <label class="toggle-switch">
             <input type="checkbox" id="cropToggle">
-            Use Black Bar Detection
+            <span class="slider"></span>
           </label>
         </div>
+        <video id="manualVideo" controls></video>
         <div class="range-container extra">
           <label>Processing Range (seconds):</label>
           <div class="range-wrapper">
@@ -356,85 +310,65 @@
             <input type="number" id="endTimeInput" placeholder="End">
           </div>
         </div>
-        <video id="manualVideo" controls></video>
         <div class="manual-buttons extra">
           <button id="setStartButton">Set Start</button>
           <button id="setEndButton">Set End</button>
         </div>
+      </div>
+    </div>
+    
+    <!-- Column 3: Generate -->
+    <div class="column-generate">
+      <h2 class="column-title">Generate</h2>
+      <div class="column-box">
         <div class="buttons">
-          <button id="processButton16x9Manual">Color</button>
-          <button id="processButtonStretched16x9Manual">Stretch</button>
-          <button id="processButtonExperimentalManual">Blur</button>
+          <button id="processButton16x9">Color</button>
+          <button id="processButtonStretched16x9">Stretch</button>
+          <button id="processButtonExperimental">Blur</button>
         </div>
       </div>
     </div>
   </div>
-
+  
   <canvas id="resultCanvas"></canvas>
   <div id="openImageLink" style="display:none;">Open image in new tab</div>
-
+  
   <!-- Hidden elements for processing -->
   <video id="video" style="display: none;"></video>
   <canvas id="frameCanvas" style="display: none;"></canvas>
-
+  
   <script>
     // Global variables
     let cropData = null;
     let finalImageBlobURL = null;
     let loadingInterval = null;
-
-    // (Slider code removed as slider is not used now)
-
+    
     // Get DOM elements
     const videoInput = document.getElementById("videoInput");
     const video = document.getElementById("video");
     const manualVideo = document.getElementById("manualVideo");
     const frameCanvas = document.getElementById("frameCanvas");
     const resultCanvas = document.getElementById("resultCanvas");
-
-    // Automatic mode processing buttons
+    
+    // Generate mode processing buttons (Column 3)
     const processButton16x9 = document.getElementById("processButton16x9");
     const processButtonStretched16x9 = document.getElementById("processButtonStretched16x9");
     const processButtonExperimental = document.getElementById("processButtonExperimental");
-
-    // Manual mode processing buttons
-    const processButton16x9Manual = document.getElementById("processButton16x9Manual");
-    const processButtonStretched16x9Manual = document.getElementById("processButtonStretched16x9Manual");
-    const processButtonExperimentalManual = document.getElementById("processButtonExperimentalManual");
-
+    
+    // Processing range inputs (from Edit column)
     const startTimeInput = document.getElementById("startTimeInput");
     const endTimeInput = document.getElementById("endTimeInput");
-
+    
     const selectFileButton = document.getElementById("selectFileButton");
     const dropZone = document.getElementById("dropZone");
     const dropZoneText = document.getElementById("dropZoneText");
-
+    
     const cropToggle = document.getElementById("cropToggle");
     const openImageLink = document.getElementById("openImageLink");
-
+    
     const setStartButton = document.getElementById("setStartButton");
     const setEndButton = document.getElementById("setEndButton");
-
-    const modeTabs = document.querySelectorAll(".mode-tab");
-    const automaticContainer = document.getElementById("automaticContainer");
-    const manualContainer = document.getElementById("manualContainer");
-
-    // Switch between Automatic and Manual modes
-    modeTabs.forEach(tab => {
-      tab.addEventListener("click", () => {
-        modeTabs.forEach(t => t.classList.remove("active"));
-        tab.classList.add("active");
-        const mode = tab.getAttribute("data-mode");
-        if (mode === "automatic") {
-          automaticContainer.style.display = "block";
-          manualContainer.style.display = "none";
-        } else {
-          automaticContainer.style.display = "none";
-          manualContainer.style.display = "block";
-        }
-      });
-    });
-
+    
     // Video file selection and loading
     videoInput.addEventListener("change", (e) => {
       const file = e.target.files[0];
@@ -473,7 +407,7 @@
         video.addEventListener("loadedmetadata", () => { stopLoadingBar(); }, { once: true });
       }
     });
-
+    
     // Loading bar functions
     function startLoadingBar() {
       loadingBar.style.width = "0%";
@@ -493,7 +427,7 @@
       loadingBar.style.width = "100%";
       setTimeout(() => { loadingBarContainer.style.display = "none"; }, 500);
     }
-
+    
     // Clicking the result canvas or open link opens the final image in a new tab
     resultCanvas.addEventListener("click", () => {
       if (finalImageBlobURL) window.open(finalImageBlobURL, "_blank");
@@ -510,7 +444,7 @@
         }
       }, "image/png");
     }
-
+    
     // Manual Range Buttons: set start/end from manual video currentTime
     setStartButton.addEventListener("click", () => {
       startTimeInput.value = Math.floor(manualVideo.currentTime);
@@ -518,8 +452,8 @@
     setEndButton.addEventListener("click", () => {
       endTimeInput.value = Math.floor(manualVideo.currentTime);
     });
-
-    // Helper: Get processing range from user inputs
+    
+    // Helper: Get processing range from user inputs (default to full video)
     function getProcessingRange() {
       const start = parseFloat(startTimeInput.value);
       const end = parseFloat(endTimeInput.value);
@@ -527,8 +461,8 @@
       const effectiveEnd = isNaN(end) ? video.duration : end;
       return { effectiveStart, effectiveEnd };
     }
-
-    // Black Bar Detection
+    
+    // Improved Black Bar Detection
     function detectCropBoundaries(callback) {
       video.currentTime = video.duration / 2;
       video.addEventListener("seeked", function onSeeked() {
@@ -540,32 +474,44 @@
         const data = imageData.data;
         const width = video.videoWidth;
         const height = video.videoHeight;
-        const threshold = 20;
-        let cropY = 0, cropBottom = height;
+        const pixelThreshold = 20; // luminance threshold
+        const blackRatio = 0.95; // if 95% of pixels in a row are dark, consider it a black bar row.
+        let topCrop = 0;
+        let bottomCrop = height;
+        // Determine top boundary
         for (let y = 0; y < height; y++) {
-          let sum = 0;
+          let blackCount = 0;
           for (let x = 0; x < width; x++) {
-            const idx = (y * width + x) * 4;
-            sum += data[idx];
+            const i = (y * width + x) * 4;
+            const r = data[i], g = data[i+1], b = data[i+2];
+            const lum = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+            if (lum < pixelThreshold) {
+              blackCount++;
+            }
           }
-          if ((sum / width) > threshold) {
-            cropY = y;
+          if ((blackCount / width) < blackRatio) {
+            topCrop = y;
             break;
           }
         }
+        // Determine bottom boundary
         for (let y = height - 1; y >= 0; y--) {
-          let sum = 0;
+          let blackCount = 0;
           for (let x = 0; x < width; x++) {
-            const idx = (y * width + x) * 4;
-            sum += data[idx];
+            const i = (y * width + x) * 4;
+            const r = data[i], g = data[i+1], b = data[i+2];
+            const lum = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+            if (lum < pixelThreshold) {
+              blackCount++;
+            }
           }
-          if ((sum / width) > threshold) {
-            cropBottom = y;
+          if ((blackCount / width) < blackRatio) {
+            bottomCrop = y;
             break;
           }
         }
-        const cropHeight = cropBottom - cropY;
-        const crop = { cropX: 0, cropY: cropY, cropWidth: width, cropHeight: cropHeight };
+        const cropHeight = bottomCrop - topCrop;
+        const crop = { cropX: 0, cropY: topCrop, cropWidth: width, cropHeight: cropHeight };
         frameCanvas.width = crop.cropWidth;
         frameCanvas.height = crop.cropHeight;
         cropData = crop;
@@ -573,25 +519,16 @@
         callback(crop);
       }, { once: true });
     }
-
-    // Wrapper: Process with Crop and Processing Range
-    function processWithCropAndRange(processFunc, manual) {
-      let range = manual ? getProcessingRange() : { effectiveStart: 0, effectiveEnd: video.duration };
-      function callProcess(crop) {
-        processFunc(crop, range.effectiveStart, range.effectiveEnd);
-      }
-      if (cropToggle.checked) {
-        detectCropBoundaries(function(crop) {
-          callProcess(crop);
-        });
-      } else {
-        callProcess(null);
-      }
+    
+    // Wrapper: Process with Crop and Processing Range using manual inputs
+    function processWithCropAndRange(processFunc) {
+      let range = getProcessingRange();
+      processFunc(cropData, range.effectiveStart, range.effectiveEnd);
     }
-
+    
     /* --- Processing Functions --- */
-
-    // Color (16x9)
+    
+    // Color (16:9)
     function processVideo16x9(crop, effectiveStart, effectiveEnd) {
       openImageLink.style.display = "none";
       finalImageBlobURL = null;
@@ -639,8 +576,8 @@
       }
       processSlice();
     }
-
-    // Stretch (16x9)
+    
+    // Stretch (16:9)
     function processVideoStretched16x9(crop, effectiveStart, effectiveEnd) {
       openImageLink.style.display = "none";
       finalImageBlobURL = null;
@@ -670,7 +607,7 @@
       }
       processSlice();
     }
-
+    
     // Blur (Experimental 16:9)
     function processVideoExperimental(crop, effectiveStart, effectiveEnd) {
       openImageLink.style.display = "none";
@@ -715,35 +652,41 @@
       }
       processSlice();
     }
-
-    /* --- Attach Event Listeners --- */
-
-    // Automatic mode buttons
+    
+    /* --- Attach Event Listeners for Generate Buttons (Column 3) --- */
+    
     processButton16x9.addEventListener("click", () => {
       if (!video.src) { alert("Please select or drop a video file first."); return; }
-      processWithCropAndRange(processVideo16x9, false);
+      // Before processing, try detecting crop boundaries if the toggle is checked.
+      if(cropToggle.checked){
+        detectCropBoundaries(() => {
+          processWithCropAndRange(processVideo16x9);
+        });
+      } else {
+        processWithCropAndRange(processVideo16x9);
+      }
     });
+    
     processButtonStretched16x9.addEventListener("click", () => {
       if (!video.src) { alert("Please select or drop a video file first."); return; }
-      processWithCropAndRange(processVideoStretched16x9, false);
+      if(cropToggle.checked){
+        detectCropBoundaries(() => {
+          processWithCropAndRange(processVideoStretched16x9);
+        });
+      } else {
+        processWithCropAndRange(processVideoStretched16x9);
+      }
     });
+    
     processButtonExperimental.addEventListener("click", () => {
       if (!video.src) { alert("Please select or drop a video file first."); return; }
-      processWithCropAndRange(processVideoExperimental, false);
-    });
-
-    // Manual mode buttons
-    processButton16x9Manual.addEventListener("click", () => {
-      if (!video.src) { alert("Please select or drop a video file first."); return; }
-      processWithCropAndRange(processVideo16x9, true);
-    });
-    processButtonStretched16x9Manual.addEventListener("click", () => {
-      if (!video.src) { alert("Please select or drop a video file first."); return; }
-      processWithCropAndRange(processVideoStretched16x9, true);
-    });
-    processButtonExperimentalManual.addEventListener("click", () => {
-      if (!video.src) { alert("Please select or drop a video file first."); return; }
-      processWithCropAndRange(processVideoExperimental, true);
+      if(cropToggle.checked){
+        detectCropBoundaries(() => {
+          processWithCropAndRange(processVideoExperimental);
+        });
+      } else {
+        processWithCropAndRange(processVideoExperimental);
+      }
     });
   </script>
 </body>
