@@ -1,67 +1,72 @@
-Video Mood Visualizer
+[![Try it][demo-shield]][demo-url]   [![GitHub][github-shield]][github-url]   [![Email][gmail-shield]][gmail-url]   ![Discord: ABC Status][discord-shield-static]
+
+[demo-shield]: https://img.shields.io/badge/Try_it-0b0b0b?style=for-the-badge&color=0b0b0b
+[demo-url]: URL
+
+[github-shield]: https://img.shields.io/badge/GitHub-5f43f2?style=for-the-badge&color=0b0b0b&logo=github&logoColor=5f43f2
+[github-url]: URL
+
+[gmail-shield]: https://img.shields.io/badge/Email-5f43f2?style=for-the-badge&color=0b0b0b&logo=gmail&logoColor=5f43f2
+[gmail-url]: URL
+
+[discord-shield-static]: https://img.shields.io/badge/Discord-landomrandom-5f43f2?style=for-the-badge&labelColor=0b0b0b&messageColor=e0e6f7&logo=discord&logoColor=5f43f2
+
+# Video Mood Visualizer
+
 The Video Mood Visualizer is a web app that locally transforms a video into a single image that reflects its overall tone or "mood" by sampling and blending frame colors, featuring different output styles and formats.
 
-Getting Started
-1. Any modern computer and browser will work. Processing speed depends on how good your hardware is.
-2. Simply open the index.html and have fun!
+Try it here: https://landonikko.github.io/Video-Mood-Visualizer
 
-How to use:
-1. Open the index.html
-2. Upload a video file
-3. Optional: Crop off the start and/or end segments
-4. Select your desired output format
-5. Press "Create Mood" -button
-6. Wait
-7. Once complete, click on the image to open it in a new tab for a full view or download
+## ![Features Shield][features-shield]
 
-Features
+- **Automatic Black Bar Removal:** Intelligently crops out letterboxing/pillarboxing.
+- **Optional Trimming:** Define start/end points to process specific video segments.
+- **Output Modes:**
+    - `Color`: Vertical stripes of average frame colors.
+    - `Stretch`: Crisp, 1-pixel wide stretched frame slices.
+    - `Gradient`: Smoothly blended stretched frame slices.
+    - `Pixel`: Grid of average frame colors for a pixelated look.
+- **Format Customization:** Presets (Desktop, Phone, Square) & custom dimensions.
+- **Film Grain Effect:** Optional toggle for added texture.
+- **Instant Preview & Download:** Click the generated image to open/save.
 
-Video Upload
-- Drag-and-drop or upload a video file
-- .mp4, .webm, .mov, .avi, .mkv... (support depends on your browser)
+[features-shield]: https://img.shields.io/badge/Features-5f43f2?style=for-the-badge&color=0b0b0b
 
-Crop Adjustment
-Black bars are detected and removed automatically by checking several points [0.3, 0.5, 0.7] throughout the video's length [1.0].
-Optional crop setting to define custom start and end points, allowing to exclude unwanted segment, such as intro sequences or outro credits from the final output.
+## ![Privacy & Processing Shield][processing-shield]
 
-Output visualization: Color
-Divides the video timeline into vertical slices; for each slice, the average frame color is calculated and rendered as a vertical color stripe.
+- No cloud processing or installations.
+- 100% client-side: built with HTML, CSS, and JavaScript.
+- Mood images are stored temporarily in your browser as blobs.
 
-Output visualization: Stretch
-Extracts a 1-pixel-wide slice from the center of each video frame with each column processed sequentially and scaled to fill the canvas. The scaling has no smoothing filtering enabled, which yields a crisp result.
+[processing-shield]: https://img.shields.io/badge/Privacy%20&%20Processing-5f43f2?style=for-the-badge&color=0b0b0b
 
-Output visualization: Gradient
-Same as Stretch, but leverages the browser’s native bilinear (or similar) filtering to soften the transitions between sampled colors, yielding a smooth result.
+## ![Use Cases Shield][use-cases-shield]
 
-Output visualization: Pixel
-Same as Color, but organizes the average frame colors into a grid of cells, emulating a pixelated effect.
+`creative projects`, `video analysis`, `artistic visualization`, `social media content`, `mood boards`, `color palette extraction`, `abstract art generation`
 
-Output Customization
-Presets for Desktop, Phone, Square aspect ratios at high resolutions, and allowing custom values for desired output.
-Optional Film Grain effect can be applied to add texture to the end result.
+[use-cases-shield]: https://img.shields.io/badge/Use_Cases-5f43f2?style=for-the-badge&color=0b0b0b
 
-Output
-The final “Mood” image is rendered on a canvas. Clicking the output image opens it in a new tab, allowing users to view the full resolution image and save it if desired.
-Below the generated image is a timer that shows time left in seconds and percentage complete.
+## ![How it Works Shield][how-it-works-shield]
 
-Everything works locally on your machine.
+The tool sequentially samples frames from your video. For each sample, it calculates color data (average or specific pixel lines) and renders it onto a canvas according to the selected mode and format, building the final visualization locally.
 
-Processing videos:
-- Calculations like averaging pixel values (using getImageData) are done in JavaScript on the CPU.
-Video Decoding:
-- The browser uses dedicated video decoding hardware (like NVIDIA’s NVDEC or Intel Quick Sync) on your GPU to decode compressed video streams. This is why you see a spike in “Video Decode” usage.
-Canvas Rendering:
-- Once the video is decoded, drawing and scaling operations on the canvas are accelerated by the GPU.
+[how-it-works-shield]: https://img.shields.io/badge/How_it_Works-5f43f2?style=for-the-badge&color=0b0b0b
 
-Roadmap
-- Explore more creative effects and customization options.
-- Enhance processing efficiency for larger video files.
-- Add ARIA attributes to improve accessibility.
+<!-- Optional: Add a Demo video like in the example if you have one -->
+<!--
+## ![Demo Shield][demo-section-shield]
 
-Contributing
-Contributions are welcome! Please fork the repository and open pull requests for any improvements or bug fixes. For major changes, consider opening an issue first to discuss your ideas.
+<video src="URL_TO_YOUR_DEMO_VIDEO" controls width="600"></video>
 
-License
-This project is licensed under the MIT License. See the LICENSE file for details.
+[demo-section-shield]: https://img.shields.io/badge/Demo-00c6ff?style=for-the-badge&color=121727
+-->
 
-Feel free to open issues for any questions, suggestions or improvements!
+## ![Feedback & Contributions Shield][feedback-shield]
+
+Contributions, bug reports and suggestions are welcome!
+
+[![Email][gmail-shield]][gmail-url]   ![Discord: ABC Status][discord-shield-static] <!-- Update or remove Discord -->
+
+[feedback-shield]: https://img.shields.io/badge/Feedback%20&%20Contribute-242c44?style=for-the-badge&color=121727&logo=github&logoColor=5f43f2
+
+MIT License
