@@ -3,23 +3,26 @@
 <head>
   <meta charset="UTF-8">
   <title>Video Mood Visualizer</title>
-  <!-- Google Fonts: Playwrite US Modern (Thin 100) for h1; Victor Mono (ExtraLight 200) for body text -->
+  <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Playwrite+US+Modern:wght@100&family=Victor+Mono:wght@200&display=swap" rel="stylesheet">
+  <!-- h1 Font: Licorice -->
+  <link href="https://fonts.googleapis.com/css2?family=Licorice&display=swap" rel="stylesheet">
+  <!-- General Font: Ubuntu Sans Mono -->
+  <link href="https://fonts.googleapis.com/css2?family=Ubuntu+Sans+Mono&display=swap" rel="stylesheet">
   <style>
     /* Global Styles */
     body {
       margin: 0;
       padding: 20px;
-      background-color: #24272c;
+      background-color: #0a0a0a;
       color: #f1f1f1;
-      font-family: 'Victor Mono', monospace;
+      font-family: 'Ubuntu Sans Mono', monospace;
       font-weight: 200;
     }
     h1 {
-      font-family: 'Playwrite US Modern', sans-serif;
-      font-size: 3rem;
+      font-family: 'Licorice', cursive;
+      font-size: 4rem; /* larger h1 */
       text-align: center;
       margin: 10px 0 20px;
       animation: fadeInUp 1s ease-out;
@@ -30,28 +33,50 @@
       to { opacity: 1; transform: translateY(0); }
     }
     
+    /* Divider Style (80% width) */
+    hr.divider80 {
+      width: 80%;
+      border: none;
+      border-top: 1px solid #3a3c40;
+      margin: 1em auto;
+    }
+    
     /* Column Titles */
     .column-title {
-      font-size: 1.2rem;
-      text-align: center;
-      margin-bottom: 10px;
+      font-size: 1.5rem; /* larger h2 */
+      text-align: left;
+      margin: 0;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #3a3c40;
+      margin-bottom: 20px;
       color: #ccc;
     }
-    
-    /* Subtle Box for Generate & Edit columns */
-    .column-box {
-      background-color: #1c1c1c;
-      border: 1px solid #3a3c40;
-      border-radius: 6px;
-      padding: 10px;
+    .sub-title {
+      font-size: 1rem;
+      text-align: center;
+      margin: 0;
+      padding: 10px 0;
+      color: #aaa;
     }
     
-    /* Main Container: 3 columns */
+    /* Common Card Style */
+    .column-box {
+      background-color: #151515; /* slightly darker card background */
+      border: 1px solid #3a3c40;
+      border-radius: 30px;
+      padding: 20px;
+      box-sizing: border-box;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    /* Main Container */
     .main-container {
       display: flex;
       justify-content: center;
-      align-items: flex-start;
-      gap: 40px;
+      align-items: stretch;
+      gap: 20px;
       max-width: 1200px;
       margin: 0 auto 20px;
     }
@@ -59,30 +84,36 @@
     .column-manual,
     .column-generate {
       width: 300px;
+      display: flex;
+      flex-direction: column;
     }
     
     /* Column 1: Upload */
-    .column-upload {
+    .column-upload .column-box {
       text-align: center;
     }
+    /* Upload box with 1:1 aspect ratio (300px card width minus 40px inner padding) */
     #dropZone {
       width: 100%;
-      padding: 40px 20px;
-      border: 2px dashed #626466;
-      border-radius: 12px;
-      background-color: #1f2226;
-      display: block;
+      height: 260px; /* 300 - 40 = 260px */
+      padding: 20px;
+      border: 1px solid #3a3c40;
+      border-radius: 20px;
+      background-color: #0a0a0a; /* darker when no file is uploaded */
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
       cursor: pointer;
       transition: background-color 0.2s, border-color 0.2s;
-      margin: 0 auto 10px;
       box-sizing: border-box;
     }
-    #dropZone.hover {
-      background-color: #272a2e;
-      border-color: #8a8a8a;
+    #dropZone:hover {
+      background-color: #0b0b0b;
+      border-color: #5a5a5a;
     }
     #uploadIcon {
-      margin-bottom: 16px;
+      margin: 0;
     }
     #uploadIcon svg {
       width: 48px;
@@ -90,11 +121,10 @@
       fill: #f1f1f1;
     }
     #dropZoneText {
-      margin-bottom: 16px;
       font-size: 1rem;
     }
     #selectFileButton {
-      padding: 10px 20px;
+      padding: 8px 16px;
       font-size: 1rem;
       background-color: #505050;
       border: none;
@@ -119,7 +149,7 @@
       height: 10px;
       background-color: #3a3c40;
       border-radius: 5px;
-      margin: 0 auto;
+      margin: 10px 0 0;
       display: none;
     }
     #loadingBar {
@@ -133,22 +163,25 @@
     /* Column 2: Edit */
     .column-manual .toggle-container,
     .column-manual .range-container {
-      margin-bottom: 10px;
+      margin: 0;
     }
     .column-manual .toggle-container label {
       font-size: 1rem;
-      margin-bottom: 6px;
+      margin: 0;
       color: #ccc;
-      display: inline-block;
-      margin-right: 10px;
     }
-    /* Custom Toggle Switch */
+    .toggle-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
     .toggle-switch {
       position: relative;
       display: inline-block;
       width: 50px;
       height: 24px;
       vertical-align: middle;
+      cursor: pointer;
     }
     .toggle-switch input {
       opacity: 0;
@@ -183,32 +216,28 @@
     .toggle-switch input:checked + .slider:before {
       transform: translateX(26px);
     }
-    
-    /* Range inputs (Processing Range) placed below video */
     .column-manual .range-wrapper {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 0;
     }
     .column-manual .range-wrapper input[type="number"] {
       width: 100%;
       padding: 4px;
       border: 1px solid #3a3c40;
       border-radius: 4px;
-      background-color: #1f2226;
+      background-color: #1a1a1a;
       color: #f1f1f1;
     }
     .column-manual video {
       width: 100%;
-      border: 2px dashed #626466;
-      border-radius: 6px;
-      background-color: #1f2226;
-      margin-bottom: 10px;
+      border: 2px solid #3a3c40;
+      border-radius: 20px;
+      background-color: #151515;
     }
     .column-manual .manual-buttons {
       display: flex;
-      gap: 10px;
-      margin-bottom: 10px;
+      gap: 0;
     }
     .column-manual .manual-buttons button {
       flex: 1;
@@ -224,13 +253,25 @@
     .column-manual .manual-buttons button:hover {
       background-color: #222;
     }
+    #overlayTextInput {
+      width: 100%;
+      padding: 5px;
+      font-size: 1rem;
+      border: 1px solid #3a3c40;
+      border-radius: 4px;
+      background-color: #1a1a1a;
+      color: #f1f1f1;
+      box-sizing: border-box;
+    }
     
     /* Column 3: Generate */
     .column-generate .buttons {
       display: flex;
       flex-direction: column;
-      gap: 10px;
-      margin-top: 10px;
+      gap: 0;
+    }
+    .column-generate .buttons button:not(:last-child) {
+      margin-bottom: 0.5em;
     }
     .column-generate .buttons button {
       padding: 12px 24px;
@@ -246,25 +287,23 @@
     .column-generate .buttons button:hover {
       background-color: #222;
     }
+    .column-generate .alt-methods {
+      margin-top: 20px;
+    }
+    .column-generate .alt-methods .buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
     
-    /* Result Canvas & Open Link */
+    /* Result Canvas */
     #resultCanvas {
       display: block;
       margin: 20px auto;
       border: 1px solid #3a3c40;
       cursor: pointer;
-    }
-    #openImageLink {
-      display: block;
-      text-align: center;
-      margin-top: 10px;
-      font-size: 1rem;
-      text-decoration: underline;
-      color: #aaddff;
-      cursor: pointer;
-    }
-    #openImageLink:hover {
-      color: #ffecaa;
+      width: 938px;
+      height: auto;
     }
   </style>
 </head>
@@ -275,26 +314,29 @@
   <div class="main-container">
     <!-- Column 1: Upload -->
     <div class="column-upload">
-      <h2 class="column-title">Upload</h2>
-      <div id="dropZone">
-        <div id="uploadIcon">
-          <svg viewBox="0 0 24 24">
-            <path d="M12 2l5.5 9h-4v9h-3v-9h-4l5.5-9z"/>
-          </svg>
+      <div class="column-box">
+        <h2 class="column-title">Upload</h2>
+        <div id="dropZone">
+          <div id="uploadIcon">
+            <!-- Default up-arrow icon -->
+            <svg viewBox="0 0 24 24">
+              <path d="M12 2l5.5 9h-4v9h-3v-9h-4l5.5-9z"/>
+            </svg>
+          </div>
+          <div id="dropZoneText">Drag and drop a video file to upload</div>
+          <button id="selectFileButton" type="button">Select file</button>
+          <input type="file" id="videoInput" accept="video/*" style="display: none;">
         </div>
-        <div id="dropZoneText">Drag and drop a video file to upload</div>
-        <button id="selectFileButton" type="button">Select file</button>
-        <input type="file" id="videoInput" accept="video/*" style="display: none;">
-      </div>
-      <div id="loadingBarContainer">
-        <div id="loadingBar"></div>
+        <div id="loadingBarContainer">
+          <div id="loadingBar"></div>
+        </div>
       </div>
     </div>
     
     <!-- Column 2: Edit -->
     <div class="column-manual">
-      <h2 class="column-title">Edit</h2>
       <div class="column-box">
+        <h2 class="column-title">Edit</h2>
         <div class="toggle-container extra">
           <label>Remove black bars</label>
           <label class="toggle-switch">
@@ -302,6 +344,7 @@
             <span class="slider"></span>
           </label>
         </div>
+        <hr class="divider80">
         <video id="manualVideo" controls></video>
         <div class="range-container extra">
           <label>Processing Range (seconds):</label>
@@ -314,24 +357,34 @@
           <button id="setStartButton">Set Start</button>
           <button id="setEndButton">Set End</button>
         </div>
+        <hr class="divider80">
+        <input type="text" id="overlayTextInput" placeholder="Enter overlay text (optional)">
       </div>
     </div>
     
     <!-- Column 3: Generate -->
     <div class="column-generate">
-      <h2 class="column-title">Generate</h2>
       <div class="column-box">
+        <h2 class="column-title">Generate</h2>
         <div class="buttons">
           <button id="processButton16x9">Color</button>
           <button id="processButtonStretched16x9">Stretch</button>
-          <button id="processButtonExperimental">Blur</button>
+          <button id="processButtonExperimental">Smooth</button>
+        </div>
+        <h3 class="sub-title">Alternate Stretch Methods</h3>
+        <div class="alt-methods">
+          <div class="buttons">
+            <button id="processButtonRowSample">Row Sample</button>
+            <button id="processButtonMultiBand">MultiBand</button>
+            <button id="processButtonGaussian">Gaussian</button>
+            <button id="processButtonMedian">Median</button>
+          </div>
         </div>
       </div>
     </div>
   </div>
   
   <canvas id="resultCanvas"></canvas>
-  <div id="openImageLink" style="display:none;">Open image in new tab</div>
   
   <!-- Hidden elements for processing -->
   <video id="video" style="display: none;"></video>
@@ -355,6 +408,12 @@
     const processButtonStretched16x9 = document.getElementById("processButtonStretched16x9");
     const processButtonExperimental = document.getElementById("processButtonExperimental");
     
+    // New alternate method buttons
+    const processButtonRowSample = document.getElementById("processButtonRowSample");
+    const processButtonMultiBand = document.getElementById("processButtonMultiBand");
+    const processButtonGaussian = document.getElementById("processButtonGaussian");
+    const processButtonMedian = document.getElementById("processButtonMedian");
+    
     // Processing range inputs (from Edit column)
     const startTimeInput = document.getElementById("startTimeInput");
     const endTimeInput = document.getElementById("endTimeInput");
@@ -364,10 +423,12 @@
     const dropZoneText = document.getElementById("dropZoneText");
     
     const cropToggle = document.getElementById("cropToggle");
-    const openImageLink = document.getElementById("openImageLink");
     
     const setStartButton = document.getElementById("setStartButton");
     const setEndButton = document.getElementById("setEndButton");
+    
+    // Overlay text input (in Edit column)
+    const overlayTextInput = document.getElementById("overlayTextInput");
     
     // Video file selection and loading
     videoInput.addEventListener("change", (e) => {
@@ -376,7 +437,13 @@
         video.src = URL.createObjectURL(file);
         manualVideo.src = video.src;
         dropZoneText.textContent = file.name;
+        // Add 1em bottom margin below filename
+        dropZoneText.style.marginBottom = "1em";
         selectFileButton.textContent = "File selected";
+        // Change drop zone background to match card background
+        dropZone.style.backgroundColor = "#151515";
+        // Change upload icon to checkmark
+        document.getElementById("uploadIcon").innerHTML = `<svg viewBox="0 0 24 24"><path d="M9 16.2l-3.5-3.5L4 14.2l5 5 12-12-1.4-1.4z"/></svg>`;
         startLoadingBar();
         video.addEventListener("loadedmetadata", () => { stopLoadingBar(); }, { once: true });
       }
@@ -402,7 +469,10 @@
         video.src = URL.createObjectURL(file);
         manualVideo.src = video.src;
         dropZoneText.textContent = file.name;
+        dropZoneText.style.marginBottom = "1em";
         selectFileButton.textContent = "File selected";
+        dropZone.style.backgroundColor = "#151515";
+        document.getElementById("uploadIcon").innerHTML = `<svg viewBox="0 0 24 24"><path d="M9 16.2l-3.5-3.5L4 14.2l5 5 12-12-1.4-1.4z"/></svg>`;
         startLoadingBar();
         video.addEventListener("loadedmetadata", () => { stopLoadingBar(); }, { once: true });
       }
@@ -428,24 +498,38 @@
       setTimeout(() => { loadingBarContainer.style.display = "none"; }, 500);
     }
     
-    // Clicking the result canvas or open link opens the final image in a new tab
+    // Clicking the result canvas opens the full-resolution image in a new tab
     resultCanvas.addEventListener("click", () => {
       if (finalImageBlobURL) window.open(finalImageBlobURL, "_blank");
     });
-    openImageLink.addEventListener("click", () => {
-      if (finalImageBlobURL) window.open(finalImageBlobURL, "_blank");
-    });
+    
     function updateFinalImageBlobURL() {
+      const overlayText = overlayTextInput.value.trim();
+      if (overlayText) {
+        const ctx = resultCanvas.getContext("2d");
+        ctx.save();
+        ctx.textBaseline = "middle";
+        ctx.textAlign = "center";
+        const maxTextWidth = resultCanvas.width * 0.5;
+        let fontSize = 100;
+        ctx.font = fontSize + "px Arial";
+        while (ctx.measureText(overlayText).width > maxTextWidth && fontSize > 10) {
+          fontSize--;
+          ctx.font = fontSize + "px Arial";
+        }
+        ctx.fillStyle = "white";
+        ctx.fillText(overlayText, resultCanvas.width / 2, resultCanvas.height / 2);
+        ctx.restore();
+      }
       resultCanvas.toBlob((blob) => {
         if (blob) {
           if (finalImageBlobURL) URL.revokeObjectURL(finalImageBlobURL);
           finalImageBlobURL = URL.createObjectURL(blob);
-          openImageLink.style.display = "block";
+          resultCanvas.style.width = "938px";
         }
       }, "image/png");
     }
     
-    // Manual Range Buttons: set start/end from manual video currentTime
     setStartButton.addEventListener("click", () => {
       startTimeInput.value = Math.floor(manualVideo.currentTime);
     });
@@ -453,7 +537,6 @@
       endTimeInput.value = Math.floor(manualVideo.currentTime);
     });
     
-    // Helper: Get processing range from user inputs (default to full video)
     function getProcessingRange() {
       const start = parseFloat(startTimeInput.value);
       const end = parseFloat(endTimeInput.value);
@@ -462,7 +545,6 @@
       return { effectiveStart, effectiveEnd };
     }
     
-    // Improved Black Bar Detection
     function detectCropBoundaries(callback) {
       video.currentTime = video.duration / 2;
       video.addEventListener("seeked", function onSeeked() {
@@ -474,17 +556,15 @@
         const data = imageData.data;
         const width = video.videoWidth;
         const height = video.videoHeight;
-        const pixelThreshold = 20; // luminance threshold
-        const blackRatio = 0.95; // if 95% of pixels in a row are dark, consider it a black bar row.
+        const pixelThreshold = 20;
+        const blackRatio = 0.95;
         let topCrop = 0;
         let bottomCrop = height;
-        // Determine top boundary
         for (let y = 0; y < height; y++) {
           let blackCount = 0;
           for (let x = 0; x < width; x++) {
             const i = (y * width + x) * 4;
-            const r = data[i], g = data[i+1], b = data[i+2];
-            const lum = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+            const lum = 0.2126 * data[i] + 0.7152 * data[i+1] + 0.0722 * data[i+2];
             if (lum < pixelThreshold) {
               blackCount++;
             }
@@ -494,13 +574,11 @@
             break;
           }
         }
-        // Determine bottom boundary
         for (let y = height - 1; y >= 0; y--) {
           let blackCount = 0;
           for (let x = 0; x < width; x++) {
             const i = (y * width + x) * 4;
-            const r = data[i], g = data[i+1], b = data[i+2];
-            const lum = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+            const lum = 0.2126 * data[i] + 0.7152 * data[i+1] + 0.0722 * data[i+2];
             if (lum < pixelThreshold) {
               blackCount++;
             }
@@ -520,17 +598,14 @@
       }, { once: true });
     }
     
-    // Wrapper: Process with Crop and Processing Range using manual inputs
     function processWithCropAndRange(processFunc) {
       let range = getProcessingRange();
       processFunc(cropData, range.effectiveStart, range.effectiveEnd);
     }
     
-    /* --- Processing Functions --- */
-    
-    // Color (16:9)
+    // Processing Functions
     function processVideo16x9(crop, effectiveStart, effectiveEnd) {
-      openImageLink.style.display = "none";
+      openImageBlobURL = null;
       finalImageBlobURL = null;
       const effectiveDuration = effectiveEnd - effectiveStart;
       const totalSlices = 1600;
@@ -548,8 +623,8 @@
           updateFinalImageBlobURL();
           return;
         }
-        const currentTime = effectiveStart + (currentSlice / totalSlices) * effectiveDuration;
-        video.currentTime = currentTime;
+        let targetTime = effectiveStart + (currentSlice / totalSlices) * effectiveDuration + 0.0001;
+        video.currentTime = targetTime;
         video.addEventListener("seeked", function onSeeked() {
           if (crop) {
             frameCtx.drawImage(video, crop.cropX, crop.cropY, crop.cropWidth, crop.cropHeight, 0, 0, crop.cropWidth, crop.cropHeight);
@@ -577,9 +652,8 @@
       processSlice();
     }
     
-    // Stretch (16:9)
     function processVideoStretched16x9(crop, effectiveStart, effectiveEnd) {
-      openImageLink.style.display = "none";
+      openImageBlobURL = null;
       finalImageBlobURL = null;
       const effectiveDuration = effectiveEnd - effectiveStart;
       const totalSlices = 1600;
@@ -592,8 +666,8 @@
           updateFinalImageBlobURL();
           return;
         }
-        const currentTime = effectiveStart + (currentSlice / totalSlices) * effectiveDuration;
-        video.currentTime = currentTime;
+        let targetTime = effectiveStart + (currentSlice / totalSlices) * effectiveDuration + 0.0001;
+        video.currentTime = targetTime;
         video.addEventListener("seeked", function onSeeked() {
           if (crop) {
             resultCtx.drawImage(video, crop.cropX, crop.cropY, crop.cropWidth, crop.cropHeight, currentSlice, 0, 1, 900);
@@ -608,9 +682,8 @@
       processSlice();
     }
     
-    // Blur (Experimental 16:9)
     function processVideoExperimental(crop, effectiveStart, effectiveEnd) {
-      openImageLink.style.display = "none";
+      openImageBlobURL = null;
       finalImageBlobURL = null;
       const effectiveDuration = effectiveEnd - effectiveStart;
       const totalSlices = 1600;
@@ -634,8 +707,8 @@
           updateFinalImageBlobURL();
           return;
         }
-        const currentTime = effectiveStart + (currentSlice / totalSlices) * effectiveDuration;
-        video.currentTime = currentTime;
+        let targetTime = effectiveStart + (currentSlice / totalSlices) * effectiveDuration + 0.0001;
+        video.currentTime = targetTime;
         video.addEventListener("seeked", function onSeeked() {
           if (crop) {
             frameCtx.drawImage(video, crop.cropX, crop.cropY, crop.cropWidth, crop.cropHeight, 0, 0, crop.cropWidth, crop.cropHeight);
@@ -653,40 +726,225 @@
       processSlice();
     }
     
-    /* --- Attach Event Listeners for Generate Buttons (Column 3) --- */
+    function processVideoRowSample(crop, effectiveStart, effectiveEnd) {
+      finalImageBlobURL = null;
+      let fixedRow = Math.floor(video.videoHeight / 2);
+      const effectiveDuration = effectiveEnd - effectiveStart;
+      const totalSlices = 1600;
+      resultCanvas.width = totalSlices;
+      resultCanvas.height = 900;
+      const resultCtx = resultCanvas.getContext("2d");
+      let currentSlice = 0;
+      function processSlice() {
+        if (currentSlice >= totalSlices) {
+          updateFinalImageBlobURL();
+          return;
+        }
+        let targetTime = effectiveStart + (currentSlice / totalSlices) * effectiveDuration + 0.0001;
+        video.currentTime = targetTime;
+        video.addEventListener("seeked", function onSeeked() {
+          let rowCanvas = document.createElement("canvas");
+          rowCanvas.width = video.videoWidth;
+          rowCanvas.height = 1;
+          let rowCtx = rowCanvas.getContext("2d");
+          rowCtx.drawImage(video, 0, fixedRow, video.videoWidth, 1, 0, 0, video.videoWidth, 1);
+          let rotatedCanvas = document.createElement("canvas");
+          rotatedCanvas.width = 1;
+          rotatedCanvas.height = 900;
+          let rotatedCtx = rotatedCanvas.getContext("2d");
+          rotatedCtx.save();
+          rotatedCtx.translate(0, 900);
+          rotatedCtx.rotate(-Math.PI / 2);
+          rotatedCtx.drawImage(rowCanvas, 0, 0, rowCanvas.width, 1, 0, 0, 900, 1);
+          rotatedCtx.restore();
+          resultCtx.drawImage(rotatedCanvas, 0, 0, 1, 900, currentSlice, 0, 1, 900);
+          currentSlice++;
+          video.removeEventListener("seeked", onSeeked);
+          processSlice();
+        }, { once: true });
+      }
+      processSlice();
+    }
+    
+    function processVideoMultiBand(crop, effectiveStart, effectiveEnd) {
+      finalImageBlobURL = null;
+      const effectiveDuration = effectiveEnd - effectiveStart;
+      const totalSlices = 1600;
+      resultCanvas.width = totalSlices;
+      resultCanvas.height = 900;
+      const resultCtx = resultCanvas.getContext("2d");
+      let currentSlice = 0;
+      function processSlice() {
+        if (currentSlice >= totalSlices) {
+          updateFinalImageBlobURL();
+          return;
+        }
+        let targetTime = effectiveStart + (currentSlice / totalSlices) * effectiveDuration + 0.0001;
+        video.currentTime = targetTime;
+        video.addEventListener("seeked", function onSeeked() {
+          if (crop) {
+            frameCanvas.width = crop.cropWidth;
+            frameCanvas.height = crop.cropHeight;
+            frameCanvas.getContext("2d").drawImage(video, crop.cropX, crop.cropY, crop.cropWidth, crop.cropHeight, 0, 0, crop.cropWidth, crop.cropHeight);
+          } else {
+            frameCanvas.width = video.videoWidth;
+            frameCanvas.height = video.videoHeight;
+            frameCanvas.getContext("2d").drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
+          }
+          const ctx = frameCanvas.getContext("2d");
+          const bandHeight = frameCanvas.height / 3;
+          function avgColor(yStart, yEnd) {
+            const imgData = ctx.getImageData(0, yStart, frameCanvas.width, yEnd - yStart);
+            let r = 0, g = 0, b = 0, count = 0;
+            for (let i = 0; i < imgData.data.length; i += 4) {
+              r += imgData.data[i];
+              g += imgData.data[i + 1];
+              b += imgData.data[i + 2];
+              count++;
+            }
+            return `rgb(${Math.floor(r / count)},${Math.floor(g / count)},${Math.floor(b / count)})`;
+          }
+          const colorTop = avgColor(0, bandHeight);
+          const colorMid = avgColor(bandHeight, 2 * bandHeight);
+          const colorBot = avgColor(2 * bandHeight, frameCanvas.height);
+          let gradient = resultCtx.createLinearGradient(0, 0, 0, 900);
+          gradient.addColorStop(0, colorTop);
+          gradient.addColorStop(0.5, colorMid);
+          gradient.addColorStop(1, colorBot);
+          resultCtx.fillStyle = gradient;
+          resultCtx.fillRect(currentSlice, 0, 1, 900);
+          currentSlice++;
+          video.removeEventListener("seeked", onSeeked);
+          processSlice();
+        }, { once: true });
+      }
+      processSlice();
+    }
+    
+    function processVideoGaussian(crop, effectiveStart, effectiveEnd) {
+      finalImageBlobURL = null;
+      const effectiveDuration = effectiveEnd - effectiveStart;
+      const totalSlices = 1600;
+      resultCanvas.width = totalSlices;
+      resultCanvas.height = 900;
+      const resultCtx = resultCanvas.getContext("2d");
+      let currentSlice = 0;
+      function processSlice() {
+        if (currentSlice >= totalSlices) {
+          updateFinalImageBlobURL();
+          return;
+        }
+        let targetTime = effectiveStart + (currentSlice / totalSlices) * effectiveDuration + 0.0001;
+        video.currentTime = targetTime;
+        video.addEventListener("seeked", function onSeeked() {
+          let tempCanvas = document.createElement("canvas");
+          tempCanvas.width = 1;
+          tempCanvas.height = 900;
+          let tempCtx = tempCanvas.getContext("2d");
+          if (crop) {
+            tempCtx.drawImage(video, crop.cropX, crop.cropY, crop.cropWidth, crop.cropHeight, 0, 0, 1, 900);
+          } else {
+            tempCtx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight, 0, 0, 1, 900);
+          }
+          tempCtx.filter = "blur(3px)";
+          let blurredCanvas = document.createElement("canvas");
+          blurredCanvas.width = 1;
+          blurredCanvas.height = 900;
+          let blurredCtx = blurredCanvas.getContext("2d");
+          blurredCtx.drawImage(tempCanvas, 0, 0);
+          resultCtx.drawImage(blurredCanvas, 0, 0, 1, 900, currentSlice, 0, 1, 900);
+          currentSlice++;
+          video.removeEventListener("seeked", onSeeked);
+          processSlice();
+        }, { once: true });
+      }
+      processSlice();
+    }
+    
+    function processVideoMedian(crop, effectiveStart, effectiveEnd) {
+      finalImageBlobURL = null;
+      const effectiveDuration = effectiveEnd - effectiveStart;
+      const totalSlices = 1600;
+      resultCanvas.width = totalSlices;
+      resultCanvas.height = 900;
+      const resultCtx = resultCanvas.getContext("2d");
+      let offCanvas = document.createElement("canvas");
+      offCanvas.width = 1;
+      offCanvas.height = 900;
+      let offCtx = offCanvas.getContext("2d");
+      let currentSlice = 0;
+      function processSlice() {
+        if (currentSlice >= totalSlices) {
+          updateFinalImageBlobURL();
+          return;
+        }
+        let targetTime = effectiveStart + (currentSlice / totalSlices) * effectiveDuration + 0.0001;
+        video.currentTime = targetTime;
+        video.addEventListener("seeked", function onSeeked() {
+          if (crop) {
+            offCtx.drawImage(video, crop.cropX, crop.cropY, crop.cropWidth, crop.cropHeight, 0, 0, 1, 900);
+          } else {
+            offCtx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight, 0, 0, 1, 900);
+          }
+          let imgData = offCtx.getImageData(0, 0, 1, 900);
+          let data = imgData.data;
+          for (let y = 1; y < 899; y++) {
+            for (let c = 0; c < 3; c++) {
+              let idx = y * 4 + c;
+              let neighbors = [
+                data[idx - 4],
+                data[idx],
+                data[idx + 4]
+              ];
+              neighbors.sort((a, b) => a - b);
+              data[idx] = neighbors[1];
+            }
+          }
+          offCtx.putImageData(imgData, 0, 0);
+          resultCtx.drawImage(offCanvas, 0, 0, 1, 900, currentSlice, 0, 1, 900);
+          currentSlice++;
+          video.removeEventListener("seeked", onSeeked);
+          processSlice();
+        }, { once: true });
+      }
+      processSlice();
+    }
+    
+    function runProcess(processFunc) {
+      if (!video.src) {
+        alert("Please select or drop a video file first.");
+        return;
+      }
+      if (cropToggle.checked) {
+        detectCropBoundaries(() => {
+          processWithCropAndRange(processFunc);
+        });
+      } else {
+        processWithCropAndRange(processFunc);
+      }
+    }
     
     processButton16x9.addEventListener("click", () => {
-      if (!video.src) { alert("Please select or drop a video file first."); return; }
-      // Before processing, try detecting crop boundaries if the toggle is checked.
-      if(cropToggle.checked){
-        detectCropBoundaries(() => {
-          processWithCropAndRange(processVideo16x9);
-        });
-      } else {
-        processWithCropAndRange(processVideo16x9);
-      }
+      runProcess(processVideo16x9);
     });
-    
     processButtonStretched16x9.addEventListener("click", () => {
-      if (!video.src) { alert("Please select or drop a video file first."); return; }
-      if(cropToggle.checked){
-        detectCropBoundaries(() => {
-          processWithCropAndRange(processVideoStretched16x9);
-        });
-      } else {
-        processWithCropAndRange(processVideoStretched16x9);
-      }
+      runProcess(processVideoStretched16x9);
+    });
+    processButtonExperimental.addEventListener("click", () => {
+      runProcess(processVideoExperimental);
     });
     
-    processButtonExperimental.addEventListener("click", () => {
-      if (!video.src) { alert("Please select or drop a video file first."); return; }
-      if(cropToggle.checked){
-        detectCropBoundaries(() => {
-          processWithCropAndRange(processVideoExperimental);
-        });
-      } else {
-        processWithCropAndRange(processVideoExperimental);
-      }
+    processButtonRowSample.addEventListener("click", () => {
+      runProcess(processVideoRowSample);
+    });
+    processButtonMultiBand.addEventListener("click", () => {
+      runProcess(processVideoMultiBand);
+    });
+    processButtonGaussian.addEventListener("click", () => {
+      runProcess(processVideoGaussian);
+    });
+    processButtonMedian.addEventListener("click", () => {
+      runProcess(processVideoMedian);
     });
   </script>
 </body>
